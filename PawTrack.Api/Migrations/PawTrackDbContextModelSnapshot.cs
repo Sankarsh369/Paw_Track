@@ -22,6 +22,71 @@ namespace PawTrack.Api.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("PawTrack.Api.Models.Animal", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Age")
+                        .HasColumnType("int");
+
+                    b.Property<int>("BranchId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Breed")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MicrochipNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PhotoUrl")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<DateTime>("RescueDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RescueLocation")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Species")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BranchId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("Animals");
+                });
+
             modelBuilder.Entity("PawTrack.Api.Models.Branch", b =>
                 {
                     b.Property<int>("Id")
@@ -48,6 +113,65 @@ namespace PawTrack.Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Branches");
+                });
+
+            modelBuilder.Entity("PawTrack.Api.Models.Category", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("PawTrack.Api.Models.MedicalRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AnimalId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CheckupDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Diagnosis")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Medication")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Treatment")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("VaccinationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("VeterinarianId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnimalId");
+
+                    b.HasIndex("VeterinarianId");
+
+                    b.ToTable("MedicalRecords");
                 });
 
             modelBuilder.Entity("PawTrack.Api.Models.User", b =>
@@ -90,6 +214,44 @@ namespace PawTrack.Api.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("PawTrack.Api.Models.Animal", b =>
+                {
+                    b.HasOne("PawTrack.Api.Models.Branch", "Branch")
+                        .WithMany()
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PawTrack.Api.Models.Category", "Category")
+                        .WithMany("Animals")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Branch");
+
+                    b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("PawTrack.Api.Models.MedicalRecord", b =>
+                {
+                    b.HasOne("PawTrack.Api.Models.Animal", "Animal")
+                        .WithMany("MedicalRecords")
+                        .HasForeignKey("AnimalId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PawTrack.Api.Models.User", "Veterinarian")
+                        .WithMany()
+                        .HasForeignKey("VeterinarianId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Animal");
+
+                    b.Navigation("Veterinarian");
+                });
+
             modelBuilder.Entity("PawTrack.Api.Models.User", b =>
                 {
                     b.HasOne("PawTrack.Api.Models.Branch", "Branch")
@@ -100,9 +262,19 @@ namespace PawTrack.Api.Migrations
                     b.Navigation("Branch");
                 });
 
+            modelBuilder.Entity("PawTrack.Api.Models.Animal", b =>
+                {
+                    b.Navigation("MedicalRecords");
+                });
+
             modelBuilder.Entity("PawTrack.Api.Models.Branch", b =>
                 {
                     b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("PawTrack.Api.Models.Category", b =>
+                {
+                    b.Navigation("Animals");
                 });
 #pragma warning restore 612, 618
         }
