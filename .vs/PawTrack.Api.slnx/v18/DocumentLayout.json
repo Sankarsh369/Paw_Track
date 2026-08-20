@@ -7,6 +7,26 @@
       "RelativeMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|solutionrelative:pawtrack.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|c:\\users\\dell\\source\\repos\\pawtrack.api\\pawtrack.api\\models\\branch.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|solutionrelative:pawtrack.api\\models\\branch.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|c:\\users\\dell\\source\\repos\\pawtrack.api\\pawtrack.api\\models\\authmodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|solutionrelative:pawtrack.api\\models\\authmodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|c:\\users\\dell\\source\\repos\\pawtrack.api\\pawtrack.api\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|solutionrelative:pawtrack.api\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|c:\\users\\dell\\source\\repos\\pawtrack.api\\pawtrack.api\\migrations\\20260818042125_addanimalmedical.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|solutionrelative:pawtrack.api\\migrations\\20260818042125_addanimalmedical.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|c:\\users\\dell\\source\\repos\\pawtrack.api\\pawtrack.api\\controllers\\branchcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|solutionrelative:pawtrack.api\\controllers\\branchcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|c:\\users\\dell\\source\\repos\\pawtrack.api\\pawtrack.api\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|solutionrelative:pawtrack.api\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
@@ -15,24 +35,8 @@
       "RelativeMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|solutionrelative:pawtrack.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\Migrations\\20260815134346_InitialCreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:PawTrack.Api\\Migrations\\20260815134346_InitialCreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|c:\\users\\dell\\source\\repos\\pawtrack.api\\pawtrack.api\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|solutionrelative:pawtrack.api\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|c:\\users\\dell\\source\\repos\\pawtrack.api\\pawtrack.api\\controllers\\branchcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|solutionrelative:pawtrack.api\\controllers\\branchcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|c:\\users\\dell\\source\\repos\\pawtrack.api\\pawtrack.api\\pawtrack.api.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}",
       "RelativeMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|solutionrelative:pawtrack.api\\pawtrack.api.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|c:\\users\\dell\\source\\repos\\pawtrack.api\\pawtrack.api\\models\\authmodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|solutionrelative:pawtrack.api\\models\\authmodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|c:\\users\\dell\\source\\repos\\pawtrack.api\\pawtrack.api\\data\\pawtrackdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -43,8 +47,8 @@
       "RelativeMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|solutionrelative:pawtrack.api\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|c:\\users\\dell\\source\\repos\\pawtrack.api\\pawtrack.api\\models\\branch.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|solutionrelative:pawtrack.api\\models\\branch.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|c:\\users\\dell\\source\\repos\\pawtrack.api\\pawtrack.api\\migrations\\20260815134346_initialcreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{00479A07-8A67-EAEE-3C0A-F033E424B42C}|PawTrack.Api\\PawTrack.Api.csproj|solutionrelative:pawtrack.api\\migrations\\20260815134346_initialcreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -58,16 +62,15 @@
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "20260815134346_InitialCreate.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\Migrations\\20260815134346_InitialCreate.cs",
-              "RelativeDocumentMoniker": "PawTrack.Api\\Migrations\\20260815134346_InitialCreate.cs",
-              "ToolTip": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\Migrations\\20260815134346_InitialCreate.cs",
-              "RelativeToolTip": "PawTrack.Api\\Migrations\\20260815134346_InitialCreate.cs",
+              "DocumentIndex": 4,
+              "Title": "20260818042125_AddAnimalMedical.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\Migrations\\20260818042125_AddAnimalMedical.cs",
+              "RelativeDocumentMoniker": "PawTrack.Api\\Migrations\\20260818042125_AddAnimalMedical.cs",
+              "ToolTip": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\Migrations\\20260818042125_AddAnimalMedical.cs",
+              "RelativeToolTip": "PawTrack.Api\\Migrations\\20260818042125_AddAnimalMedical.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-15T13:43:46.85Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-18T04:21:25.602Z"
             },
             {
               "$type": "Document",
@@ -77,27 +80,50 @@
               "RelativeDocumentMoniker": "PawTrack.Api\\Program.cs",
               "ToolTip": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\Program.cs",
               "RelativeToolTip": "PawTrack.Api\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABwAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAADoAAAAAAAAAAAAAAAQAAAAcAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-08-15T09:34:19.771Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "PawTrack.Api\\Controllers\\AuthController.cs",
+              "ToolTip": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "PawTrack.Api\\Controllers\\AuthController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAEoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-15T09:39:16.842Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "appsettings.json",
-              "DocumentMoniker": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\appsettings.json",
-              "RelativeDocumentMoniker": "PawTrack.Api\\appsettings.json",
-              "ToolTip": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\appsettings.json",
-              "RelativeToolTip": "PawTrack.Api\\appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAACAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2026-08-15T09:36:15.725Z",
-              "EditorCaption": ""
+              "Title": "AuthModels.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\Models\\AuthModels.cs",
+              "RelativeDocumentMoniker": "PawTrack.Api\\Models\\AuthModels.cs",
+              "ToolTip": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\Models\\AuthModels.cs",
+              "RelativeToolTip": "PawTrack.Api\\Models\\AuthModels.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-15T09:38:21.954Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "Branch.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\Models\\Branch.cs",
+              "RelativeDocumentMoniker": "PawTrack.Api\\Models\\Branch.cs",
+              "ToolTip": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\Models\\Branch.cs",
+              "RelativeToolTip": "PawTrack.Api\\Models\\Branch.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-15T09:30:25.627Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
               "Title": "launchSettings.json",
               "DocumentMoniker": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\Properties\\launchSettings.json",
               "RelativeDocumentMoniker": "PawTrack.Api\\Properties\\launchSettings.json",
@@ -105,20 +131,31 @@
               "RelativeToolTip": "PawTrack.Api\\Properties\\launchSettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAbAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2026-08-15T13:04:11.344Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-15T13:04:11.344Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "AuthController.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\Controllers\\AuthController.cs",
-              "RelativeDocumentMoniker": "PawTrack.Api\\Controllers\\AuthController.cs",
-              "ToolTip": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\Controllers\\AuthController.cs",
-              "RelativeToolTip": "PawTrack.Api\\Controllers\\AuthController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFMAAAABAAAAAAAAAA==",
+              "DocumentIndex": 7,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\appsettings.json",
+              "RelativeDocumentMoniker": "PawTrack.Api\\appsettings.json",
+              "ToolTip": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\appsettings.json",
+              "RelativeToolTip": "PawTrack.Api\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAACAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-08-15T09:36:15.725Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "20260815134346_InitialCreate.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\Migrations\\20260815134346_InitialCreate.cs",
+              "RelativeDocumentMoniker": "PawTrack.Api\\Migrations\\20260815134346_InitialCreate.cs",
+              "ToolTip": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\Migrations\\20260815134346_InitialCreate.cs",
+              "RelativeToolTip": "PawTrack.Api\\Migrations\\20260815134346_InitialCreate.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-15T09:39:16.842Z"
+              "WhenOpened": "2026-08-15T13:43:46.85Z"
             },
             {
               "$type": "Document",
@@ -134,7 +171,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 8,
               "Title": "PawTrack.Api.http",
               "DocumentMoniker": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\PawTrack.Api.http",
               "RelativeDocumentMoniker": "PawTrack.Api\\PawTrack.Api.http",
@@ -146,31 +183,19 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "AuthModels.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\Models\\AuthModels.cs",
-              "RelativeDocumentMoniker": "PawTrack.Api\\Models\\AuthModels.cs",
-              "ToolTip": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\Models\\AuthModels.cs",
-              "RelativeToolTip": "PawTrack.Api\\Models\\AuthModels.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-15T09:38:21.954Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "PawTrackDbContext.cs",
               "DocumentMoniker": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\Data\\PawTrackDbContext.cs",
               "RelativeDocumentMoniker": "PawTrack.Api\\Data\\PawTrackDbContext.cs",
               "ToolTip": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\Data\\PawTrackDbContext.cs",
               "RelativeToolTip": "PawTrack.Api\\Data\\PawTrackDbContext.cs",
-              "ViewState": "AgIAAAoAAAAAAAAAAAAQwCUAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAAoAAAAAAAAAAAAzwCUAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-08-15T09:34:05.04Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "User.cs",
               "DocumentMoniker": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\Models\\User.cs",
               "RelativeDocumentMoniker": "PawTrack.Api\\Models\\User.cs",
@@ -179,18 +204,6 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-08-15T09:33:15.713Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "Branch.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\Models\\Branch.cs",
-              "RelativeDocumentMoniker": "PawTrack.Api\\Models\\Branch.cs",
-              "ToolTip": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\Models\\Branch.cs",
-              "RelativeToolTip": "PawTrack.Api\\Models\\Branch.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-15T09:30:25.627Z"
             }
           ]
         }

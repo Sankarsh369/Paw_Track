@@ -5,6 +5,8 @@ namespace PawTrack.Api.DTOs.Animal
         public int Id { get; set; }
         public int CategoryId { get; set; }
         public string? CategoryName { get; set; }
+        public int BranchId { get; set; }
+        public string? BranchName { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Species { get; set; } = string.Empty;
         public string Breed { get; set; } = string.Empty;

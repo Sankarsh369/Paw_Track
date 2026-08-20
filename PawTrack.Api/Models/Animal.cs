@@ -29,6 +29,14 @@ namespace PawTrack.Api.Models
         [ForeignKey(nameof(CategoryId))]
         public Category? Category { get; set; }
 
+        // The branch (shelter location) currently holding this animal.
+        // Required per Database Design doc §5.2 — every Animal belongs to exactly one Branch.
+        [Required]
+        public int BranchId { get; set; }
+
+        [ForeignKey(nameof(BranchId))]
+        public Branch? Branch { get; set; }
+
         [Required, MaxLength(100)]
         public string Name { get; set; } = string.Empty;
 

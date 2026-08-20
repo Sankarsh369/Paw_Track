@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PawTrack.Api.Models;
 
 namespace PawTrack.Api.Data
@@ -10,6 +10,9 @@ namespace PawTrack.Api.Data
 
         public DbSet<Branch> Branches => Set<Branch>();
         public DbSet<User> Users => Set<User>();
+        public DbSet<Category> Categories => Set<Category>();
+        public DbSet<Animal> Animals => Set<Animal>();
+        public DbSet<MedicalRecord> MedicalRecords => Set<MedicalRecord>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -33,6 +36,42 @@ namespace PawTrack.Api.Data
             modelBuilder.Entity<User>()
                 .Property(u => u.Role)
                 .HasConversion<string>();
+
+            // ---- Animal & Medical module (Akash) ----
+
+            // Animal.BranchId is required — every animal belongs to exactly one branch
+            modelBuilder.Entity<Animal>()
+                .HasOne(a => a.Branch)
+                .WithMany()
+                .HasForeignKey(a => a.BranchId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Animal>()
+                .HasOne(a => a.Category)
+                .WithMany(c => c.Animals)
+                .HasForeignKey(a => a.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Store Gender/Status as readable text, same reasoning as User.Role above
+            modelBuilder.Entity<Animal>()
+                .Property(a => a.Gender)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<Animal>()
+                .Property(a => a.Status)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<MedicalRecord>()
+                .HasOne(m => m.Animal)
+                .WithMany(a => a.MedicalRecords)
+                .HasForeignKey(m => m.AnimalId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MedicalRecord>()
+                .HasOne(m => m.Veterinarian)
+                .WithMany()
+                .HasForeignKey(m => m.VeterinarianId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
