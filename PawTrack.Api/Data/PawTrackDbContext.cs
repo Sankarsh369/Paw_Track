@@ -76,7 +76,7 @@ namespace PawTrack.Api.Data
                 .HasForeignKey(m => m.VeterinarianId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // ---- Behavior & Visit Assessment module (Tanishq) ----
+            // ---- Behavior Assessment module (Tanishq) ----
 
             modelBuilder.Entity<BehaviorRecord>()
                 .HasOne(b => b.Animal)
@@ -93,6 +93,8 @@ namespace PawTrack.Api.Data
             modelBuilder.Entity<BehaviorRecord>()
                 .Property(b => b.Category)
                 .HasConversion<string>();
+
+            // ---- Visit Slots & Bookings module (Tanishq) ----
 
             modelBuilder.Entity<VisitSlot>()
                 .HasOne(s => s.Branch)
