@@ -1,0 +1,42 @@
+@inject ApiClientService ApiClient
+
+<div class="user-switcher" style="display: flex; align-items: center; gap: 12px; background: rgba(15, 23, 42, 0.6); padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
+    <span style="font-size: 0.85rem; color: #94a3b8;">Logged in as:</span>
+    <select class="form-select" @onchange="OnUserSelect" value="@SelectedKey" style="width: auto; padding: 4px 8px; font-size: 0.85rem; background: #1e293b; color: #fff; border: 1px solid #475569; border-radius: 6px;">
+        <optgroup label="Admins & Staff">
+            <option value="1|OrgAdmin|null">Sarah Admin (Org Admin - All Branches)</option>
+            <option value="2|BranchAdmin|1">John Manager (Branch 1 Admin - Downtown)</option>
+            <option value="3|RescueStaff|1">Alice Staff (Branch 1 Rescue Staff - Downtown)</option>
+            <option value="5|BranchAdmin|2">Elena Manager (Branch 2 Admin - Westside)</option>
+            <option value="6|RescueStaff|2">David Staff (Branch 2 Rescue Staff - Westside)</option>
+        </optgroup>
+        <optgroup label="Adopters">
+            <option value="8|Adopter|null">Mark Adopter (User #8)</option>
+            <option value="9|Adopter|null">Emily Adopter (User #9)</option>
+            <option value="10|Adopter|null">Michael Adopter (User #10)</option>
+        </optgroup>
+    </select>
+    <span class="badge" style="background: #6366f1; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">
+        @ApiClient.CurrentUserRole @(ApiClient.CurrentUserBranchId.HasValue ? $"(Branch {ApiClient.CurrentUserBranchId})" : "(Org-wide)")
+    </span>
+</div>
+
+@code {
+    private string SelectedKey => $"{ApiClient.CurrentUserId}|{ApiClient.CurrentUserRole}|{(ApiClient.CurrentUserBranchId.HasValue ? ApiClient.CurrentUserBranchId.Value.ToString() : "null")}";
+
+    private void OnUserSelect(ChangeEventArgs e)
+    {
+        var val = e.Value?.ToString();
+        if (string.IsNullOrEmpty(val)) return;
+
+        var parts = val.Split('|');
+        if (parts.Length == 3)
+        {
+            var userId = int.Parse(parts[0]);
+            var role = Enum.Parse<UserRole>(parts[1]);
+            int? branchId = parts[2] == "null" ? null : int.Parse(parts[2]);
+
+            ApiClient.SwitchUser(userId, role, branchId);
+        }
+    }
+}

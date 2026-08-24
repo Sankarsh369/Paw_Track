@@ -1,0 +1,91 @@
+
+PawTrack
+System Design Document
+Revision 2 — Visit Booking, Multi-Branch, AI scope reduced to Chatbot + Description Generation
+1. Architecture Overview
+PawTrack keeps its layered architecture — Presentation, API, Application/Service, Data — with three changes this revision: a Branch module threading through every layer (so the system supports one organization running multiple shelter locations), a Visit Slot & Booking module, and a trimmed AI Orchestrator that now only covers description generation and chat (matching and photo recognition are removed from scope).
+
+Dashed boxes (Mobile App, External Sync Service, Petfinder/Microchip Registry) remain future extension points.
+
+2. Multi-Branch Architecture
+Yes — worth designing for now. You're building this for one organization, and organizations that run rescues at this scale very often expand to multiple locations; retrofitting branch-scoping after animals, staff accounts and adoption history already exist is a far bigger job than including it from day one, even if you launch with a single branch.
+•  Single database, branch-scoped — one shared schema (not one database per branch) — Animal, User and VisitSlot each carry a BranchId. This keeps species/breed Category data and Org Admin visibility shared across the whole organization.
+•  Role scope, not separate logins — an Org Admin account has BranchId = null and can see/report across every branch; a Branch Admin, Rescue Staff or Veterinarian account has BranchId set and only operates within that branch.
+•  Every service call is branch-filtered — the Application/Service layer applies the caller's branch scope to every query — a Branch Admin's requests are automatically limited to their own branch's animals, applications and visit slots.
+•  Reporting rolls up — Org Admin reports aggregate across all branches by default, with an option to filter down to one — useful for comparing adoption rates or medical costs branch-to-branch.
+This is not the same as multi-tenant SaaS (separate organizations sharing the platform) — that's a bigger, different problem. This design assumes one organization with multiple branches, which is what you described.
+3. Visit Scheduling & Booking Flow
+This replaces any notion of "reserving" an animal for one adopter. The animal stays visible and Available to everyone until someone actually moves forward with an application.
+1.  Branch publishes slots — Rescue Staff at a branch define VisitSlots — a date, a time window, and how many visitors it can take.
+2.  Adopter books a slot — from an animal's profile, the adopter picks an open VisitSlot at that animal's branch; this creates a VisitBooking. The animal's Status is untouched — it's still Available, and other adopters can book their own slots for the same animal.
+3.  Visit happens — staff mark the booking CheckedIn, then Completed (or NoShow/Cancelled if it doesn't happen).
+4.  Adopter decides — if they want to move forward, they submit an AdoptionApplication, optionally linked back to the VisitBooking that led to it. If not, they're free to browse and book visits for other animals — nothing was held against them or the animal.
+5.  Once an application is approved — Animal.Status moves to Pending/Adopted; any other still-open VisitBookings for that animal are flagged for staff to follow up and close out, rather than left dangling.
+This directly addresses the concern about long holds: nothing blocks an animal from being seen or applied for by multiple interested adopters until one adoption is actually finalized.
+
+4. Module Breakdown
+Module
+UI
+API
+Service
+Branch Management
+Branch setup/list UI (Org Admin)
+BranchController
+BranchService
+Animal Management
+Animal registration & profile UI
+AnimalController
+AnimalService
+Medical Management
+Medical record UI
+MedicalController
+MedicalService
+Behavior Management
+Behavior assessment UI
+BehaviorController
+BehaviorService
+Visit Scheduling
+Slot calendar & booking UI
+VisitController
+VisitService
+Adoption Management
+Application & review UI
+AdoptionController
+AdoptionService, ApprovalService
+Adopter Follow-up
+Follow-up scheduling UI
+FollowUpController
+FollowUpService
+Payment & Donation
+Checkout / donate UI
+PaymentController
+PaymentService → Payment Gateway
+AI Description Generation
+Draft/approve description UI
+AiTextController
+AiOrchestrator → NLG Model
+AI Chatbot
+Chat widget (adopter portal)
+ChatbotController
+AiOrchestrator → Chat LLM
+5. AI Integration Design (reduced scope)
+Adopter-animal matching and photo-based breed recognition are dropped for now — both need trained/tuned models and labeled data to be reliable, which is a heavier lift than the rest of this phase. The two AI features that remain are both text-based and lower-risk to build well:
+•  AI-generated animal descriptions — generated on request from staff, stored in AIGeneratedDescription with IsApproved = false; only shown on the adopter-facing profile once a staff member approves or edits it. The AI never publishes directly.
+•  AI chatbot — answers adopter FAQs (hours, adoption process, what to bring to a visit, etc.) and can hand off unresolved questions to staff; every exchange is logged for review.
+Both still route through the same AI Orchestrator pattern as before, so if matching or photo recognition are revisited later, they slot into the same architecture without a redesign — see §7.
+6. Payment & Donation Integration
+Unchanged from the previous revision: PaymentService sits behind a gateway-agnostic interface (IPaymentGateway).
+1.  Adoption fee flow — once an AdoptionApplication is approved, the adopter pays through the gateway's hosted checkout; on success a Payment row (Type = AdoptionFee) is created and linked to the Adoption.
+2.  Donation flow — available any time, optionally linked to a specific Animal; DonorUserId is set if logged in, or null for a guest donation.
+3.  Webhook confirmation — the gateway confirms success/failure asynchronously; PaymentService updates Payment.Status rather than trusting the client redirect alone.
+No card or bank details are stored in PawTrack — the gateway's hosted checkout handles that, keeping PawTrack out of full PCI-DSS scope.
+7. Non-Functional Considerations
+•  Security — role- and branch-scoped authorization on every controller; payment detail collection fully delegated to the gateway; AI-generated content requires staff approval before publication.
+•  Scalability — VisitSlot capacity checks and Payment webhook handling are the two spots most likely to see concurrent access (popular slots, checkout) — both use row-level status checks/locks to avoid double-booking or double-charging.
+•  Reliability — payment status is reconciled via webhook, not just the synchronous response.
+•  Extensibility — the IPaymentGateway pattern will be reused for future Petfinder/microchip integrations (an IExternalRegistry-style interface), and the AI Orchestrator pattern already accommodates adding matching/vision back in later.
+8. Future Extension Points (not built this phase)
+•  Mobile app — consumes the same branch-aware API layer already built for web; no new backend module required.
+•  Petfinder / Adopt-a-Pet sync — an External Sync Service calling an outbound API, feeding from the existing Animal table — additive, per branch or org-wide.
+•  Microchip registry integration — calls an external registry API using the Animal.MicrochipNumber field already reserved in the database design.
+•  AI matching / photo recognition — can be reintroduced later behind the same AI Orchestrator; worth prototyping a simpler rule-based compatibility filter first (e.g. matching on BehaviorRecord fields directly) before committing to a full ML model.

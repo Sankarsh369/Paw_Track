@@ -1,0 +1,28 @@
+@inherits LayoutComponentBase
+
+<div class="app-layout" style="min-height: 100vh; background: #0f172a; color: #f8fafc; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 24px;">
+    <div style="max-width: 1300px; margin: 0 auto;">
+        <!-- Header -->
+        <header style="display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); padding: 16px 24px; border-radius: 12px; margin-bottom: 24px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 1.8rem;">🐾</span>
+                <div>
+                    <h1 style="font-size: 1.35rem; font-weight: 700; margin: 0; background: linear-gradient(135deg, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        PawTrack (.NET / Blazor)
+                    </h1>
+                    <span style="font-size: 0.8rem; color: #94a3b8;">Adoption & Follow-Up Module</span>
+                </div>
+            </div>
+
+            <UserSwitcher />
+        </header>
+
+        <!-- Navigation Tabs -->
+        <NavMenu />
+
+        <!-- Body -->
+        <main>
+            @Body
+        </main>
+    </div>
+</div>

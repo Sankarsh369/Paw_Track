@@ -1,0 +1,278 @@
+
+PawTrack
+Requirement Analysis Document
+Revision 2 — Multi-Branch, Visit Booking, Payment & Donation, AI (Chatbot + Description Generation)
+Project Summary
+Project: Animal Rescue, Medical & Adoption Management System for a multi-branch organization.
+Goal: One centralized system for managing rescued animals across all of the organization's branches — from rescue, through medical care and behavior assessment, to a no-pressure visit-then-decide adoption process, payment/donations, and post-adoption follow-up.
+Technology: Web application built with ASP.NET Core, C#, Entity Framework Core and SQL Server.
+What changed this revision:
+•  Multi-branch support — the organization may operate several shelter locations; animals, staff and visit slots are scoped to a branch, with Org Admin able to see across all of them.
+•  Visit booking replaces long holds — adopters book a slot to visit and see an animal in person; the animal stays available to everyone else until an application is actually approved.
+•  Payment & donation added — adoption fees are paid online; donations can be made toward a specific animal or the general fund.
+•  AI scope reduced — AI photo-based breed recognition and AI adopter-animal matching are dropped as too complex for now. AI chatbot support and AI-drafted animal descriptions remain, both requiring staff review before anything reaches an adopter.
+Users & Roles
+•  Org Admin — organization-wide account (not tied to one branch) — manages branches, users, categories and cross-branch reports
+•  Branch Admin — manages a single branch's staff, animals and adoption approvals
+•  Rescue Staff — registers animals, manages rescue/behavior details, publishes visit slots and adoption applications at their branch
+•  Veterinarian — manages medical records and treatments at their branch
+•  Adopter — browses animals, books visits, submits adoption applications, pays fees and can donate
+Main Process
+The animal's journey moves through the following stages, now including a visit step before commitment:
+Animal
+Rescued
+Register at
+Branch
+Medical
+Examination
+Behavior
+Assessment
+Mark
+Available
+↓
+↓
+↓
+↓
+
+Adopter Books
+a Visit
+Visit
+Completed
+Adopter
+Applies
+Application
+Verification
+Approve /
+Reject
+↓
+↓
+↓
+↓
+
+Adoption +
+Fee Payment
+Post-Adoption
+Follow-up
+Donations can be made at any point in this flow, independent of the adoption pipeline — toward a specific animal or the general fund.
+
+16. Requirement Analysis
+Each module below is broken down the same way: business need → user story → acceptance criteria → system design → database design → development task → sprint.
+16.1 Branch Management — Register a Branch
+Stage
+Example
+Business Requirement
+Org Admin can add a new shelter location the organization operates.
+User Story
+As an Org Admin, I want to register a new branch so that its animals, staff and visit slots can be tracked separately.
+Acceptance Criteria
+Name, region/city and address required; phone optional; branch appears in Org Admin's branch filter immediately.
+System Design
+Branch setup UI, BranchController/API and BranchService.
+Database Design
+Branch entity/table; Animal, User and VisitSlot each reference it by BranchId.
+Development Task
+Implement Branch CRUD and the branch-scoping middleware used by every other module.
+Sprint
+Schedule the feature in an appropriate sprint.
+
+16.2 Animal Management — Register Animal
+Stage
+Example
+Business Requirement
+Rescue staff can register a newly rescued animal at their branch.
+User Story
+As a rescue staff member, I want to register a rescued animal at my branch so its profile and rescue details are recorded.
+Acceptance Criteria
+Name, species, breed, age, gender required; rescue date/location required; branch defaults to staff's own branch; status defaults to "Under Assessment".
+System Design
+Animal Registration UI, AnimalController/API and AnimalService.
+Database Design
+Animal entity/table with CategoryId and BranchId foreign keys, plus a reserved MicrochipNumber field.
+Development Task
+Implement Register Animal feature and field validation.
+Sprint
+Schedule the feature in an appropriate sprint.
+
+16.3 Medical Management — Medical Examination
+Stage
+Example
+Business Requirement
+Veterinarian can record medical examination and treatment details for an animal.
+User Story
+As a veterinarian, I want to record diagnosis and treatment so the animal's medical history is tracked.
+Acceptance Criteria
+Diagnosis required; treatment, medication and vaccination optional; entry linked to one Animal.
+System Design
+Medical Record UI, MedicalController/API and MedicalService.
+Database Design
+MedicalRecord entity/table linked to Animal and to the reviewing Veterinarian (User).
+Development Task
+Implement Medical Record creation, editing and validation.
+Sprint
+Schedule the feature in an appropriate sprint.
+
+16.4 Behavior Management — Behavior Assessment
+Stage
+Example
+Business Requirement
+Rescue staff can assess temperament and compatibility of an animal.
+User Story
+As a rescue staff member, I want to record a behavior assessment so adopters know what to expect before visiting.
+Acceptance Criteria
+Temperament required; compatibility with kids/other pets required; special requirements optional.
+System Design
+Behavior Assessment UI, BehaviorController/API and BehaviorService.
+Database Design
+BehaviorRecord entity/table linked to Animal by foreign key.
+Development Task
+Implement Behavior Assessment feature and validation.
+Sprint
+Schedule the feature in an appropriate sprint.
+
+16.5 Visit Scheduling — Book a Visit
+Stage
+Example
+Business Requirement
+Adopter can book a time slot to visit and see an available animal in person before deciding, instead of the animal being held for them.
+User Story
+As an adopter, I want to book a visit slot for an animal so I can meet it before committing to adopt.
+Acceptance Criteria
+Only open VisitSlots at the animal's branch are bookable; booking does not change Animal.Status; multiple adopters may book different slots for the same animal; slot closes once Capacity is reached.
+System Design
+Slot calendar & booking UI, VisitController/API and VisitService.
+Database Design
+VisitSlot entity/table (per branch) and VisitBooking entity/table (per animal + adopter).
+Development Task
+Implement slot publishing (staff), slot booking (adopter) and check-in/no-show status updates.
+Sprint
+Schedule the feature in an appropriate sprint.
+
+16.6 Adoption Management — Adoption Application
+Stage
+Example
+Business Requirement
+Adopter can apply to adopt an animal that is marked available, typically after visiting it.
+User Story
+As an adopter, I want to submit an adoption application so I can request to adopt an animal I've visited.
+Acceptance Criteria
+Animal status must be "Available"; application optionally links to the VisitBooking that led to it; one active application per adopter per animal.
+System Design
+Adoption Application UI, AdoptionController/API and AdoptionService.
+Database Design
+AdoptionApplication entity/table linked to Animal, Adopter (User) and an optional VisitBooking.
+Development Task
+Implement application submission, uniqueness check and validation.
+Sprint
+Schedule the feature in an appropriate sprint.
+
+16.7 Adopter Management — Application Verification & Approval
+Stage
+Example
+Business Requirement
+Branch Admin or Rescue Staff can verify and approve or reject adoption applications.
+User Story
+As a Branch Admin, I want to verify and approve or reject applications so only suitable adopters are matched.
+Acceptance Criteria
+Approval creates an Adoption record and moves Animal.Status to Pending/Adopted; any other open VisitBookings for that animal are flagged for follow-up; rejection requires a reason.
+System Design
+Application Review UI, AdoptionController/API and ApprovalService.
+Database Design
+Adoption entity/table linked to AdoptionApplication; Animal.Status updated on approval.
+Development Task
+Implement the approval/rejection workflow and status transitions.
+Sprint
+Schedule the feature in an appropriate sprint.
+
+16.8 Payment & Donation — Adoption Fee and Donations
+Stage
+Example
+Business Requirement
+Adopter can pay the adoption fee online; anyone can donate toward a specific animal or the general fund.
+User Story
+As an adopter, I want to pay the adoption fee securely online so I can complete the adoption without an in-person cash transaction.
+Acceptance Criteria
+No card/bank details stored in PawTrack; payment status confirmed via gateway webhook, not just the client redirect; a Payment row records Type (AdoptionFee/Donation), amount and status.
+System Design
+Checkout/donate UI, PaymentController/API and PaymentService behind a gateway-agnostic interface.
+Database Design
+Payment entity/table with nullable links to Adoption, Animal and donor User, so one row can represent a fee or a donation.
+Development Task
+Implement checkout flow, webhook handler and payment status reconciliation.
+Sprint
+Schedule the feature in an appropriate sprint.
+
+16.9 AI Description Generation — Draft an Animal Profile
+Stage
+Example
+Business Requirement
+Staff can generate a draft adoption-profile description for an animal instead of writing it from scratch.
+User Story
+As a rescue staff member, I want an AI-drafted description so I can publish an appealing profile faster.
+Acceptance Criteria
+Generated text is never shown publicly until a staff member approves or edits it (IsApproved = true).
+System Design
+Draft/approve UI, AiTextController/API and the AI Orchestrator calling a text-generation model.
+Database Design
+AIGeneratedDescription entity/table linked to Animal and to the reviewing staff User.
+Development Task
+Implement the generate-draft call, the approval UI and the publish gate.
+Sprint
+Schedule the feature in an appropriate sprint.
+
+16.10 AI Chatbot — Adopter FAQ Support
+Stage
+Example
+Business Requirement
+Adopters can get instant answers to common questions (hours, fees, adoption process, visit requirements) via a chat widget.
+User Story
+As an adopter, I want to ask quick questions in a chat widget so I don't have to wait for staff to reply to an email.
+Acceptance Criteria
+Works for both logged-in and anonymous visitors; unresolved questions can be handed off to staff; every exchange is logged.
+System Design
+Chat widget UI, ChatbotController/API and the AI Orchestrator calling a chat model.
+Database Design
+ChatbotConversation and ChatbotMessage entities/tables.
+Development Task
+Implement the chat widget, message logging and staff hand-off path.
+Sprint
+Schedule the feature in an appropriate sprint.
+
+16.11 Admin & Reports — Post-Adoption Follow-up
+Stage
+Example
+Business Requirement
+Staff can schedule and record post-adoption follow-ups; Org Admin can view reports across all branches.
+User Story
+As an Org Admin, I want branch-level and organization-wide adoption/medical/donation reports so I can track performance across locations.
+Acceptance Criteria
+Follow-up date and notes required; Branch Admin reports are scoped to their branch; Org Admin reports aggregate across all branches with a per-branch filter.
+System Design
+Follow-up UI, reporting dashboard, FollowUpController/API and ReportService.
+Database Design
+FollowUp entity/table linked to Adoption; report queries aggregate across Branch, Animal, Payment.
+Development Task
+Implement Follow-up tracking and the branch-aware reporting dashboard.
+Sprint
+Schedule the feature in an appropriate sprint.
+17. Requirement Analysis Checklist
+•  Business — What problem are we solving, across how many branches, and who are the stakeholders at each?
+•  Users — Who will use the system? What are their roles (Org Admin, Branch Admin, Rescue Staff, Veterinarian, Adopter) and what can each do, at which scope (branch vs organization-wide)?
+•  Functional — What should the system do across Branch, Animal, Medical, Behavior, Visit Scheduling, Adoption, Payment/Donation, AI Chatbot, AI Description Generation and Reports?
+•  Non-functional — Security (payment data never stored locally, role/branch-scoped access), performance (slot booking under concurrent demand), availability and scalability across branches?
+•  Validation — Are the requirements clear, complete, testable and supported by acceptance criteria — including the rule that a visit or a pending application never blocks other adopters from an animal?
+What Comes Next?
+Database Design and System Design have already been completed against this revised scope. The team will progressively move from what needs to be built to how it will be delivered.
+Requirement
+Analysis
+System
+Design
+Database
+Design
+Agile Sprint
+Planning
+Development
+Main Database Entities
+Branch · User · Category · Animal · MedicalRecord · BehaviorRecord · VisitSlot · VisitBooking · AdoptionApplication · Adoption · FollowUp · Payment · AIGeneratedDescription · ChatbotConversation · ChatbotMessage
+Core Goal
+Not just: "Add pet → click Adopt → change status."
+Instead: manage the complete lifecycle of each rescued animal — across every branch — from rescue through a pressure-free visit-and-decide adoption process to post-adoption follow-up, without ever holding an animal hostage from other interested adopters.

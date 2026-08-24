@@ -1,0 +1,235 @@
+@page "/review"
+@inject ApiClientService ApiClient
+@implements IDisposable
+
+<div class="staff-review-portal">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div>
+            <h2 style="margin: 0; font-size: 1.35rem;">Adoption Application Review Queue</h2>
+            <p style="color: #94a3b8; font-size: 0.85rem; margin: 4px 0 0 0;">
+                Authoritative staff approval & rejection workflow with branch scoping.
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <label style="font-size: 0.85rem; color: #94a3b8;">Filter Status:</label>
+            <select class="form-select" @onchange="OnStatusFilterChanged" style="background: #1e293b; color: #fff; border: 1px solid #475569; padding: 6px 12px; border-radius: 6px;">
+                <option value="">All Statuses</option>
+                <option value="Pending" selected>Pending</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
+            </select>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(feedbackMessage))
+    {
+        <div style="background: rgba(99, 102, 241, 0.2); border: 1px solid #6366f1; color: #c7d2fe; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <span>@feedbackMessage</span>
+            <button @onclick="() => feedbackMessage = null" style="background: none; border: none; color: inherit; cursor: pointer;">✕</button>
+        </div>
+    }
+
+    <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 20px;">
+        @if (applications.Count == 0)
+        {
+            <p style="color: #94a3b8; text-align: center; padding: 30px;">No applications found matching criteria.</p>
+        }
+        else
+        {
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); color: #94a3b8; font-size: 0.85rem; text-align: left;">
+                        <th style="padding: 10px;">App ID</th>
+                        <th style="padding: 10px;">Animal</th>
+                        <th style="padding: 10px;">Applicant</th>
+                        <th style="padding: 10px;">Branch</th>
+                        <th style="padding: 10px;">Date</th>
+                        <th style="padding: 10px;">Linked Visit</th>
+                        <th style="padding: 10px;">Status</th>
+                        <th style="padding: 10px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var app in applications)
+                    {
+                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.9rem;">
+                            <td style="padding: 10px;"><strong>#@app.Id</strong></td>
+                            <td style="padding: 10px;">
+                                <div><strong>@app.AnimalName</strong> (@app.AnimalSpecies)</div>
+                                <span style="font-size: 0.75rem; color: #94a3b8;">Status: @app.AnimalStatus</span>
+                            </td>
+                            <td style="padding: 10px;">
+                                <div>@app.AdopterName</div>
+                                <span style="font-size: 0.75rem; color: #64748b;">@app.AdopterEmail</span>
+                            </td>
+                            <td style="padding: 10px;">@app.BranchName</td>
+                            <td style="padding: 10px;">@app.ApplicationDate.ToString("yyyy-MM-dd")</td>
+                            <td style="padding: 10px;">
+                                @if (app.LinkedVisit != null)
+                                {
+                                    <span style="color: #34d399; font-weight: 600;">Visit #@app.LinkedVisit.Id</span>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">@app.LinkedVisit.SlotDate?.ToString("yyyy-MM-dd") • @app.LinkedVisit.Status</div>
+                                }
+                                else
+                                {
+                                    <span style="color: #64748b;">No Visit Linked</span>
+                                }
+                            </td>
+                            <td style="padding: 10px;">
+                                <span style="padding: 2px 8px; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; background: @(app.Status == ApplicationStatus.Approved ? "rgba(16, 185, 129, 0.2)" : (app.Status == ApplicationStatus.Rejected ? "rgba(239, 68, 68, 0.2)" : "rgba(245, 158, 11, 0.2)")); color: @(app.Status == ApplicationStatus.Approved ? "#34d399" : (app.Status == ApplicationStatus.Rejected ? "#f87171" : "#fbbf24"));">
+                                    @app.Status
+                                </span>
+                            </td>
+                            <td style="padding: 10px;">
+                                @if (app.Status == ApplicationStatus.Pending)
+                                {
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-success" style="padding: 4px 10px; font-size: 0.8rem; background: #10b981; color: #fff;" @onclick="() => OpenApproveModal(app)">
+                                            ✓ Approve
+                                        </button>
+                                        <button class="btn btn-danger" style="padding: 4px 10px; font-size: 0.8rem; background: #ef4444; color: #fff;" @onclick="() => OpenRejectModal(app)">
+                                            ✕ Reject
+                                        </button>
+                                    </div>
+                                }
+                                else if (app.Status == ApplicationStatus.Rejected)
+                                {
+                                    <span style="font-size: 0.8rem; color: #f87171;">Reason: @app.RejectionReason</span>
+                                }
+                                else
+                                {
+                                    <span style="font-size: 0.8rem; color: #34d399;">Finalized</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+    <!-- Approve Confirmation Modal -->
+    @if (selectedApproveApp != null)
+    {
+        <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 50;">
+            <div style="background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 24px; width: 100%; max-width: 500px;">
+                <h3 style="margin-top: 0;">Approve Adoption — App #@selectedApproveApp.Id</h3>
+                
+                <div style="background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; color: #fcd34d; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.88rem;">
+                    <strong>Critical Action Confirmation:</strong>
+                    <ul style="margin: 6px 0 0 16px; padding: 0;">
+                        <li>Animal <strong>@selectedApproveApp.AnimalName</strong> status transitions to <code>Adopted</code>.</li>
+                        <li>An official <strong>Adoption</strong> record will be created.</li>
+                        <li>Other open visits for this animal will be flagged for staff follow-up.</li>
+                    </ul>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 12px;">
+                    <button class="btn btn-secondary" @onclick="() => selectedApproveApp = null">Cancel</button>
+                    <button class="btn btn-success" style="background: #10b981; color: #fff;" @onclick="ConfirmApprove">Confirm & Create Adoption</button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Reject Reason Modal -->
+    @if (selectedRejectApp != null)
+    {
+        <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 50;">
+            <div style="background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 24px; width: 100%; max-width: 480px;">
+                <h3 style="margin-top: 0;">Reject Application — App #@selectedRejectApp.Id</h3>
+
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 0.85rem; color: #f87171; margin-bottom: 6px;">Rejection Reason * (Required):</label>
+                    <textarea @bind="rejectionReason" rows="3" class="form-textarea" placeholder="Enter formal rejection reason..." style="width: 100%; background: #0f172a; color: #fff; border: 1px solid #475569; padding: 8px; border-radius: 6px;"></textarea>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 12px;">
+                    <button class="btn btn-secondary" @onclick="() => selectedRejectApp = null">Cancel</button>
+                    <button class="btn btn-danger" style="background: #ef4444; color: #fff;" disabled="@string.IsNullOrWhiteSpace(rejectionReason)" @onclick="ConfirmReject">Confirm Rejection</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<ApplicationResponseDto> applications = new();
+    private ApplicationStatus? currentStatusFilter = ApplicationStatus.Pending;
+    private string? feedbackMessage;
+
+    private ApplicationResponseDto? selectedApproveApp;
+    private ApplicationResponseDto? selectedRejectApp;
+    private string rejectionReason = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        ApiClient.OnUserChanged += async () => await LoadApplicationsAsync();
+        await LoadApplicationsAsync();
+    }
+
+    private async Task LoadApplicationsAsync()
+    {
+        var res = await ApiClient.GetApplicationsAsync(currentStatusFilter);
+        applications = res?.Data ?? new List<ApplicationResponseDto>();
+        StateHasChanged();
+    }
+
+    private async Task OnStatusFilterChanged(ChangeEventArgs e)
+    {
+        var val = e.Value?.ToString();
+        currentStatusFilter = string.IsNullOrEmpty(val) ? null : Enum.Parse<ApplicationStatus>(val);
+        await LoadApplicationsAsync();
+    }
+
+    private void OpenApproveModal(ApplicationResponseDto app)
+    {
+        selectedApproveApp = app;
+    }
+
+    private void OpenRejectModal(ApplicationResponseDto app)
+    {
+        selectedRejectApp = app;
+        rejectionReason = "";
+    }
+
+    private async Task ConfirmApprove()
+    {
+        if (selectedApproveApp == null) return;
+
+        var res = await ApiClient.ApproveApplicationAsync(selectedApproveApp.Id);
+        if (res != null && res.Success)
+        {
+            feedbackMessage = $"Application #{selectedApproveApp.Id} approved successfully! Adoption created.";
+            selectedApproveApp = null;
+            await LoadApplicationsAsync();
+        }
+        else
+        {
+            feedbackMessage = $"Error: {res?.Error ?? "Approval failed."}";
+        }
+    }
+
+    private async Task ConfirmReject()
+    {
+        if (selectedRejectApp == null || string.IsNullOrWhiteSpace(rejectionReason)) return;
+
+        var res = await ApiClient.RejectApplicationAsync(selectedRejectApp.Id, rejectionReason);
+        if (res != null && res.Success)
+        {
+            feedbackMessage = $"Application #{selectedRejectApp.Id} rejected with reason recorded.";
+            selectedRejectApp = null;
+            await LoadApplicationsAsync();
+        }
+        else
+        {
+            feedbackMessage = $"Error: {res?.Error ?? "Rejection failed."}";
+        }
+    }
+
+    public void Dispose()
+    {
+        ApiClient.OnUserChanged -= async () => await LoadApplicationsAsync();
+    }
+}

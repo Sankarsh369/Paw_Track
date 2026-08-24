@@ -1,0 +1,232 @@
+@page "/followup"
+@inject ApiClientService ApiClient
+@implements IDisposable
+
+<div class="adoption-followup-portal">
+    <div style="margin-bottom: 20px;">
+        <h2 style="margin: 0; font-size: 1.35rem;">Adoption & Follow-Up History</h2>
+        <p style="color: #94a3b8; font-size: 0.85rem; margin: 4px 0 0 0;">
+            1:N Post-Adoption Follow-Up timeline and check-in scheduling.
+        </p>
+    </div>
+
+    @if (!string.IsNullOrEmpty(feedbackMessage))
+    {
+        <div style="background: rgba(99, 102, 241, 0.2); border: 1px solid #6366f1; color: #c7d2fe; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <span>@feedbackMessage</span>
+            <button @onclick="() => feedbackMessage = null" style="background: none; border: none; color: inherit; cursor: pointer;">✕</button>
+        </div>
+    }
+
+    @if (adoptions.Count == 0)
+    {
+        <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 40px; text-align: center; color: #94a3b8;">
+            No adoption records found.
+        </div>
+    }
+    else
+    {
+        <div style="display: grid; grid-template-columns: 320px 1fr; gap: 20px;">
+            <!-- Left: Adoption List -->
+            <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 16px;">
+                <h3 style="margin-top: 0; font-size: 1.1rem; margin-bottom: 12px;">Adoptions (@adoptions.Count)</h3>
+                <div style="display: flex; flexDirection: column; gap: 8px;">
+                    @foreach (var a in adoptions)
+                    {
+                        <div @onclick="() => selectedAdoptionId = a.Id"
+                             style="padding: 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; background: @(SelectedAdoption?.Id == a.Id ? "rgba(99, 102, 241, 0.25)" : "rgba(15, 23, 42, 0.5)"); border: @(SelectedAdoption?.Id == a.Id ? "1px solid #6366f1" : "1px solid rgba(255, 255, 255, 0.05)");">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                <strong style="font-size: 0.95rem;">@a.AnimalName</strong>
+                                <span style="font-size: 0.75rem; color: #a5b4fc;">#@a.Id</span>
+                            </div>
+                            <div style="font-size: 0.8rem; color: #94a3b8;">Adopter: @a.AdopterName</div>
+                            <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">
+                                Date: @a.AdoptionDate.ToString("yyyy-MM-dd") • @a.FollowUpCount Check-ins
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Right: Selected Adoption Details & Follow-up Timeline -->
+            @if (SelectedAdoption != null)
+            {
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <!-- Adoption Summary Card -->
+                    <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                            <div>
+                                <h3 style="margin: 0; font-size: 1.2rem;">Adoption: @SelectedAdoption.AnimalName</h3>
+                                <span style="font-size: 0.85rem; color: #94a3b8;">Branch: @SelectedAdoption.BranchName</span>
+                            </div>
+                            @if (ApiClient.CurrentUserRole != UserRole.Adopter)
+                            {
+                                <button class="btn btn-primary" @onclick="() => showScheduleModal = true">
+                                    + Schedule Check-in
+                                </button>
+                            }
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; background: rgba(15, 23, 42, 0.6); padding: 14px; border-radius: 8px;">
+                            <div>
+                                <div style="font-size: 0.75rem; color: #64748b;">Adopter</div>
+                                <div style="font-weight: 600; font-size: 0.9rem;">@SelectedAdoption.AdopterName</div>
+                                <div style="font-size: 0.75rem; color: #94a3b8;">@SelectedAdoption.AdopterEmail</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.75rem; color: #64748b;">Approved By</div>
+                                <div style="font-weight: 600; font-size: 0.9rem;">@SelectedAdoption.ApprovedByName</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.75rem; color: #64748b;">Adoption Date</div>
+                                <div style="font-weight: 600; font-size: 0.9rem;">@SelectedAdoption.AdoptionDate.ToString("yyyy-MM-dd")</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Follow-Up Timeline -->
+                    <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 20px;">
+                        <h3 style="margin-top: 0; font-size: 1.1rem; margin-bottom: 6px;">Post-Adoption Follow-Up Timeline (@SelectedAdoption.FollowUpHistory.Count)</h3>
+                        <p style="color: #94a3b8; font-size: 0.82rem; margin-bottom: 16px;">
+                            Chronological check-in records and medical/home updates.
+                        </p>
+
+                        @if (SelectedAdoption.FollowUpHistory.Count == 0)
+                        {
+                            <p style="color: #64748b; font-size: 0.9rem;">No follow-up check-ins recorded yet.</p>
+                        }
+                        else
+                        {
+                            <div style="display: flex; flex-direction: column; gap: 14px;">
+                                @foreach (var fu in SelectedAdoption.FollowUpHistory)
+                                {
+                                    <div style="border-left: 3px solid @(fu.Status == FollowUpStatus.Completed ? "#34d399" : "#fbbf24"); padding-left: 14px;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                            <strong>Check-in #@fu.Id (@fu.FollowUpDate.ToString("yyyy-MM-dd"))</strong>
+                                            <span style="padding: 2px 8px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; background: @(fu.Status == FollowUpStatus.Completed ? "rgba(16, 185, 129, 0.2)" : "rgba(245, 158, 11, 0.2)"); color: @(fu.Status == FollowUpStatus.Completed ? "#34d399" : "#fbbf24");">
+                                                @fu.Status
+                                            </span>
+                                        </div>
+                                        <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 6px;">
+                                            Conducted By: @fu.ConductedByName (@fu.ConductedByRole)
+                                        </div>
+                                        <div style="font-size: 0.88rem; color: #e2e8f0; background: rgba(0,0,0,0.25); padding: 10px; border-radius: 6px;">
+                                            @fu.Notes
+                                        </div>
+
+                                        @if (fu.Status == FollowUpStatus.Scheduled && ApiClient.CurrentUserRole != UserRole.Adopter)
+                                        {
+                                            <div style="margin-top: 8px; display: flex; justify-content: flex-end;">
+                                                <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;" @onclick="() => CompleteFollowUp(fu.Id)">
+                                                    ✓ Mark Completed
+                                                </button>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- Schedule Follow-Up Modal -->
+    @if (showScheduleModal && SelectedAdoption != null)
+    {
+        <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 50;">
+            <div style="background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 24px; width: 100%; max-width: 480px;">
+                <h3 style="margin-top: 0;">Schedule Follow-Up for @SelectedAdoption.AnimalName</h3>
+
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 0.85rem; color: #94a3b8; margin-bottom: 6px;">Follow-up Date:</label>
+                    <input type="date" @bind="newFollowUpDate" style="width: 100%; background: #0f172a; color: #fff; border: 1px solid #475569; padding: 8px; border-radius: 6px;" />
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 0.85rem; color: #94a3b8; margin-bottom: 6px;">Check-in Notes / Objectives:</label>
+                    <textarea @bind="newFollowUpNotes" rows="3" placeholder="Enter objectives (e.g. 1-month routine checkup, vaccination review)..." style="width: 100%; background: #0f172a; color: #fff; border: 1px solid #475569; padding: 8px; border-radius: 6px;"></textarea>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 12px;">
+                    <button class="btn btn-secondary" @onclick="() => showScheduleModal = false">Cancel</button>
+                    <button class="btn btn-primary" disabled="@(string.IsNullOrWhiteSpace(newFollowUpNotes))" @onclick="ScheduleFollowUp">Save Follow-Up</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<AdoptionResponseDto> adoptions = new();
+    private int? selectedAdoptionId;
+    private string? feedbackMessage;
+
+    private bool showScheduleModal;
+    private DateTime newFollowUpDate = DateTime.UtcNow.AddDays(7).Date;
+    private string newFollowUpNotes = "";
+
+    private AdoptionResponseDto? SelectedAdoption =>
+        adoptions.FirstOrDefault(a => a.Id == selectedAdoptionId) ?? adoptions.FirstOrDefault();
+
+    protected override async Task OnInitializedAsync()
+    {
+        ApiClient.OnUserChanged += async () => await LoadAdoptionsAsync();
+        await LoadAdoptionsAsync();
+    }
+
+    private async Task LoadAdoptionsAsync()
+    {
+        var res = await ApiClient.GetAdoptionsAsync();
+        adoptions = res?.Data ?? new List<AdoptionResponseDto>();
+        if (!selectedAdoptionId.HasValue && adoptions.Count > 0)
+        {
+            selectedAdoptionId = adoptions[0].Id;
+        }
+        StateHasChanged();
+    }
+
+    private async Task ScheduleFollowUp()
+    {
+        if (SelectedAdoption == null || string.IsNullOrWhiteSpace(newFollowUpNotes)) return;
+
+        var res = await ApiClient.CreateFollowUpAsync(new ScheduleFollowUpDto
+        {
+            AdoptionId = SelectedAdoption.Id,
+            FollowUpDate = newFollowUpDate,
+            Notes = newFollowUpNotes
+        });
+
+        if (res != null && res.Success)
+        {
+            feedbackMessage = "Post-adoption check-in scheduled successfully.";
+            showScheduleModal = false;
+            newFollowUpNotes = "";
+            await LoadAdoptionsAsync();
+        }
+        else
+        {
+            feedbackMessage = $"Error: {res?.Error ?? "Scheduling failed."}";
+        }
+    }
+
+    private async Task CompleteFollowUp(int followUpId)
+    {
+        var res = await ApiClient.CompleteFollowUpAsync(followUpId, "Check-in completed.");
+        if (res != null && res.Success)
+        {
+            feedbackMessage = "Follow-up marked as Completed.";
+            await LoadAdoptionsAsync();
+        }
+        else
+        {
+            feedbackMessage = $"Error: {res?.Error ?? "Update failed."}";
+        }
+    }
+
+    public void Dispose()
+    {
+        ApiClient.OnUserChanged -= async () => await LoadAdoptionsAsync();
+    }
+}
