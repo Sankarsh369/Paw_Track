@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PawTrack.Api.DTOs.Medical;
@@ -39,6 +40,14 @@ namespace PawTrack.Api.Controllers
         [Authorize(Roles = "Veterinarian,OrgAdmin,BranchAdmin")]
         public async Task<ActionResult<MedicalRecordDto>> Create([FromBody] CreateMedicalRecordDto dto)
         {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var vetUserId))
+            {
+                return Unauthorized("Unable to determine veterinarian user identity from token claims.");
+            }
+
+            dto.VeterinarianId = vetUserId;
+
             try
             {
                 var created = await _medicalService.CreateAsync(dto);

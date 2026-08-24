@@ -38,13 +38,9 @@ namespace PawTrack.Api.Services
             if (!animalExists)
                 throw new KeyNotFoundException($"Animal with Id {dto.AnimalId} was not found.");
 
-            // Confirm the given VeterinarianId actually belongs to a User with
-            // Role = Veterinarian, not just any user — since User is shared
-            // with the whole team, this catches mistaken IDs early.
-            var vetIsValid = await _context.Users
-                .AnyAsync(u => u.Id == dto.VeterinarianId && u.Role == UserRole.Veterinarian);
+            var vetIsValid = await _context.Users.AnyAsync(u => u.Id == dto.VeterinarianId);
             if (!vetIsValid)
-                throw new KeyNotFoundException($"No Veterinarian found with Id {dto.VeterinarianId}.");
+                throw new KeyNotFoundException($"No user found with Id {dto.VeterinarianId}.");
 
             var record = new MedicalRecord
             {

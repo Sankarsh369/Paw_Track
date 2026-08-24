@@ -4,10 +4,8 @@ namespace PawTrack.Api.DTOs.Medical
 {
     public class CreateMedicalRecordDto
     {
-        [Required]
         public int AnimalId { get; set; }
 
-        [Required]
         public int VeterinarianId { get; set; }
 
         [Required, MaxLength(500)]

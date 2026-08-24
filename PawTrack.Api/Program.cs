@@ -49,6 +49,17 @@ namespace PawTrack.Api
 
 
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    policy.WithOrigins("http://localhost:3000", "http://127.0.0.1:3000")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials();
+                });
+            });
+
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
@@ -65,8 +76,10 @@ namespace PawTrack.Api
                 };
             });
             builder.Services.AddAuthorization();
+            builder.Services.AddHttpClient();
             builder.Services.AddScoped<IAnimalService, AnimalService>();
             builder.Services.AddScoped<IMedicalService, MedicalService>();
+            builder.Services.AddScoped<IAiDescriptionService, AiDescriptionService>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -77,7 +90,7 @@ namespace PawTrack.Api
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
+            app.UseCors("AllowFrontend");
 
             app.UseAuthentication();
             app.UseAuthorization();

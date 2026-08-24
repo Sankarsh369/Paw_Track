@@ -13,6 +13,7 @@ namespace PawTrack.Api.Data
         public DbSet<Category> Categories => Set<Category>();
         public DbSet<Animal> Animals => Set<Animal>();
         public DbSet<MedicalRecord> MedicalRecords => Set<MedicalRecord>();
+        public DbSet<AiAnimalDescription> AiAnimalDescriptions => Set<AiAnimalDescription>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -72,6 +73,24 @@ namespace PawTrack.Api.Data
                 .WithMany()
                 .HasForeignKey(m => m.VeterinarianId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // ---- AI Description module ----
+            modelBuilder.Entity<AiAnimalDescription>()
+                .HasOne(d => d.Animal)
+                .WithMany()
+                .HasForeignKey(d => d.AnimalId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<AiAnimalDescription>()
+                .HasOne(d => d.ReviewedBy)
+                .WithMany()
+                .HasForeignKey(d => d.ReviewedById)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AiAnimalDescription>()
+                .Property(d => d.Status)
+                .HasConversion<string>();
         }
     }
 }

@@ -1,24 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\PawTrack.Api.csproj": {}
+    "C:\\Users\\abhin\\OneDrive\\Documents\\ai\\Paw_Track\\PawTrack.Api\\PawTrack.Api.csproj": {}
   },
   "projects": {
-    "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\PawTrack.Api.csproj": {
+    "C:\\Users\\abhin\\OneDrive\\Documents\\ai\\Paw_Track\\PawTrack.Api\\PawTrack.Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\PawTrack.Api.csproj",
+        "projectUniqueName": "C:\\Users\\abhin\\OneDrive\\Documents\\ai\\Paw_Track\\PawTrack.Api\\PawTrack.Api.csproj",
         "projectName": "PawTrack.Api",
-        "projectPath": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\PawTrack.Api.csproj",
-        "packagesPath": "C:\\Users\\DELL\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\DELL\\source\\repos\\PawTrack.Api\\PawTrack.Api\\obj\\",
+        "projectPath": "C:\\Users\\abhin\\OneDrive\\Documents\\ai\\Paw_Track\\PawTrack.Api\\PawTrack.Api.csproj",
+        "packagesPath": "C:\\Users\\abhin\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\abhin\\OneDrive\\Documents\\ai\\Paw_Track\\PawTrack.Api\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\DELL\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\abhin\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -45,7 +41,7 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.400"
+        "SdkAnalysisLevel": "10.0.300"
       },
       "frameworks": {
         "net10.0": {
@@ -104,7 +100,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.400/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.300/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.AspNetCore": "(,10.0.32767]",
             "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",
