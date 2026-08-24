@@ -18,6 +18,7 @@ namespace PawTrack.Api.Services
         {
             return await _context.Animals
                 .Include(a => a.Category)
+                .Include(a => a.Branch)
                 .Select(a => ToDto(a))
                 .ToListAsync();
         }
@@ -26,6 +27,7 @@ namespace PawTrack.Api.Services
         {
             var animal = await _context.Animals
                 .Include(a => a.Category)
+                .Include(a => a.Branch)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
             return animal is null ? null : ToDto(animal);
@@ -33,9 +35,14 @@ namespace PawTrack.Api.Services
 
         public async Task<AnimalDto> CreateAsync(CreateAnimalDto dto)
         {
+            var branchExists = await _context.Branches.AnyAsync(b => b.Id == dto.BranchId);
+            if (!branchExists)
+                throw new KeyNotFoundException($"Branch with Id {dto.BranchId} was not found.");
+
             var animal = new Animal
             {
                 CategoryId = dto.CategoryId,
+                BranchId = dto.BranchId,
                 Name = dto.Name,
                 Species = dto.Species,
                 Breed = dto.Breed,
@@ -87,6 +94,8 @@ namespace PawTrack.Api.Services
             Id = a.Id,
             CategoryId = a.CategoryId,
             CategoryName = a.Category?.Name,
+            BranchId = a.BranchId,
+            BranchName = a.Branch?.Name,
             Name = a.Name,
             Species = a.Species,
             Breed = a.Breed,
@@ -100,3 +109,4 @@ namespace PawTrack.Api.Services
         };
     }
 }
+
