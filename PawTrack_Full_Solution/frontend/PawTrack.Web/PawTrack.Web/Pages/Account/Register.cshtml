@@ -1,0 +1,50 @@
+@page
+@model PawTrack.Web.Pages.Account.RegisterModel
+@{
+    ViewData["Title"] = "Create account";
+}
+
+<div class="auth-wrap">
+    <div class="form-card">
+        <span class="eyebrow">Join PawTrack</span>
+        <h2 class="mt-8 mb-24">Create your adopter account</h2>
+
+        @if (Model.ErrorMessage is not null)
+        {
+            <div class="alert alert-error">@Model.ErrorMessage</div>
+        }
+
+        <form method="post">
+            <div class="field">
+                <label asp-for="Input.Name">Full name</label>
+                <input asp-for="Input.Name" type="text" placeholder="Jordan Rivera" />
+                <span asp-validation-for="Input.Name" class="text-faint"></span>
+            </div>
+            <div class="field">
+                <label asp-for="Input.Email">Email</label>
+                <input asp-for="Input.Email" type="email" placeholder="you@example.com" />
+                <span asp-validation-for="Input.Email" class="text-faint"></span>
+            </div>
+            <div class="form-row">
+                <div class="field">
+                    <label asp-for="Input.Password">Password</label>
+                    <input asp-for="Input.Password" type="password" />
+                    <span asp-validation-for="Input.Password" class="text-faint"></span>
+                </div>
+                <div class="field">
+                    <label asp-for="Input.ConfirmPassword">Confirm password</label>
+                    <input asp-for="Input.ConfirmPassword" type="password" />
+                    <span asp-validation-for="Input.ConfirmPassword" class="text-faint"></span>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block mt-8">Create account</button>
+        </form>
+
+        <p class="text-faint mt-16 text-center">
+            Already have an account? <a href="/Account/Login">Log in</a>
+        </p>
+        <p class="text-faint text-center">
+            Staff or vet? <a href="/Account/Login">Log in here</a> — accounts are created by your Org Admin.
+        </p>
+    </div>
+</div>

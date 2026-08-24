@@ -1,0 +1,72 @@
+@page
+@model PawTrack.Web.Pages.Admin.Applications.IndexModel
+@{
+    ViewData["Title"] = "Applications";
+    ViewData["Nav"] = "admin";
+    ViewData["AdminNav"] = "applications";
+}
+
+<section class="section">
+    <div class="container">
+        <span class="eyebrow">Staff console</span>
+        <h1 class="mt-8 mb-24">Adoption applications</h1>
+        <partial name="/Pages/Admin/_AdminNav.cshtml" />
+
+        @if (Model.ErrorMessage is not null)
+        {
+            <div class="alert alert-error">@Model.ErrorMessage</div>
+        }
+
+        <div class="tabs">
+            <a href="?status=Pending" class="@(Model.SelectedStatus == "Pending" ? "active" : "")">Pending</a>
+            <a href="?status=Approved" class="@(Model.SelectedStatus == "Approved" ? "active" : "")">Approved</a>
+            <a href="?status=Rejected" class="@(Model.SelectedStatus == "Rejected" ? "active" : "")">Rejected</a>
+        </div>
+
+        @if (Model.Applications.Count == 0)
+        {
+            <div class="empty-state"><h3>Nothing here</h3><p>No @Model.SelectedStatus.ToLower() applications right now.</p></div>
+        }
+        else
+        {
+            <div class="ledger-panel">
+                <table class="ledger">
+                    <thead>
+                        <tr>
+                            <th>Animal</th><th>Adopter</th><th>Submitted</th><th>Status</th>
+                            @if (Model.SelectedStatus == "Pending")
+                            {
+                                <th>Decision</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var app in Model.Applications)
+                        {
+                            <tr>
+                                <td><a href="/Animals/Details/@app.AnimalId">@app.AnimalName</a></td>
+                                <td>@app.AdopterName</td>
+                                <td class="num-cell">@app.ApplicationDate.ToString("MMM d, yyyy")</td>
+                                <td><span class="badge @(app.Status == "Approved" ? "badge-pine" : app.Status == "Rejected" ? "badge-rust" : "badge-ochre")">@app.Status</span></td>
+                                @if (Model.SelectedStatus == "Pending")
+                                {
+                                    <td>
+                                        <div class="flex gap-8">
+                                            <form method="post" asp-page-handler="Approve" asp-route-id="@app.Id">
+                                                <button type="submit" class="btn btn-primary btn-sm">Approve</button>
+                                            </form>
+                                            <form method="post" asp-page-handler="Reject" asp-route-id="@app.Id" class="flex gap-8">
+                                                <input type="text" name="reason" placeholder="Reason (optional)" style="width:150px;padding:6px 8px;" />
+                                                <button type="submit" class="btn btn-rust btn-sm">Reject</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</section>

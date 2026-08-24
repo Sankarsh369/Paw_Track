@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../../frontend/PawTrack.Web/PawTrack.Web/PawTrack.Web.csproj" />
+  <Project Path="PawTrack.Api/PawTrack.Api.csproj" />
+</Solution>

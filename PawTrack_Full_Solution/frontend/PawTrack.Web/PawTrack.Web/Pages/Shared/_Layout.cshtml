@@ -1,0 +1,93 @@
+@using PawTrack.Web.Services
+@inject CurrentUser Me
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] · PawTrack</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <a class="brand" href="/">
+                <span class="brand-mark">PT</span>
+                <span>PawTrack<small>Multi-Branch Rescue Network</small></span>
+            </a>
+
+            <nav class="main-nav">
+                <a href="/" class="@(ViewData["Nav"] as string == "home" ? "active" : "")">Home</a>
+                <a href="/Animals" class="@(ViewData["Nav"] as string == "animals" ? "active" : "")">Browse Animals</a>
+                <a href="/Donate" class="@(ViewData["Nav"] as string == "donate" ? "active" : "")">Donate</a>
+                @if (Me.IsAuthenticated)
+                {
+                    <a href="/Dashboard" class="@(ViewData["Nav"] as string == "dashboard" ? "active" : "")">Dashboard</a>
+                }
+                @if (Me.IsStaff)
+                {
+                    <a href="/Admin" class="@(ViewData["Nav"] as string == "admin" ? "active" : "")">Staff Console</a>
+                }
+            </nav>
+
+            <div class="nav-actions">
+                @if (Me.IsAuthenticated)
+                {
+                    <span class="nav-user">
+                        @Me.Name <span class="role-chip">@Me.Role</span>
+                    </span>
+                    <form method="post" action="/Account/Logout" style="display:inline">
+                        <button type="submit" class="btn btn-ghost btn-sm">Log out</button>
+                    </form>
+                }
+                else
+                {
+                    <a href="/Account/Login" class="btn btn-ghost btn-sm">Log in</a>
+                    <a href="/Account/Register" class="btn btn-primary btn-sm">Adopt with us</a>
+                }
+            </div>
+        </div>
+    </header>
+
+    <main>
+        @RenderBody()
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-grid">
+            <div>
+                <div class="brand" style="margin-bottom:6px;">
+                    <span class="brand-mark">PT</span>
+                    <span>PawTrack</span>
+                </div>
+                <p class="footer-note">Every animal tracked, every branch connected.</p>
+            </div>
+            <div class="footer-links">
+                <a href="/Animals">Browse animals</a>
+                <a href="/Donate">Donate</a>
+                <a href="/Account/Login">Staff / vet log in</a>
+            </div>
+            <div class="footer-note">© @DateTime.Now.Year PawTrack Rescue Network</div>
+        </div>
+    </footer>
+
+    <!-- AI Chatbot widget -->
+    <button class="chat-toggle" id="chatToggle" aria-label="Open chat assistant">💬</button>
+    <div class="chat-panel" id="chatPanel">
+        <div class="chat-head">
+            <span>PawTrack Assistant</span>
+            <button id="chatClose" aria-label="Close chat">✕</button>
+        </div>
+        <div class="chat-body" id="chatBody">
+            <div class="chat-msg bot">Hi! I can help with adopting, visiting, donations, or adoption fees. What can I help with?</div>
+        </div>
+        <form class="chat-input-row" id="chatForm">
+            <input type="text" id="chatInput" placeholder="Ask a question…" autocomplete="off" />
+            <button type="submit" class="btn btn-primary btn-sm">Send</button>
+        </form>
+    </div>
+
+    <script src="~/js/chat.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

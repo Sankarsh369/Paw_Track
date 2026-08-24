@@ -1,0 +1,104 @@
+@page
+@model PawTrack.Web.Pages.Dashboard.IndexModel
+@{
+    ViewData["Title"] = "Your Dashboard";
+    ViewData["Nav"] = "dashboard";
+}
+
+<section class="section">
+    <div class="container">
+        <span class="eyebrow">Your account</span>
+        <h1 class="mt-8 mb-24">Your adoption journey</h1>
+
+        <div class="stat-cards">
+            <div class="stat-card"><span class="num">@Model.Visits.Count(v => v.Status == "Booked")</span><span class="label">Upcoming visits</span></div>
+            <div class="stat-card"><span class="num">@Model.Applications.Count(a => a.Status == "Pending")</span><span class="label">Pending applications</span></div>
+            <div class="stat-card"><span class="num">@Model.Applications.Count(a => a.Status == "Approved")</span><span class="label">Approved adoptions</span></div>
+            <div class="stat-card"><span class="num">@Model.Payments.Count(p => p.Status == "Completed")</span><span class="label">Completed payments</span></div>
+        </div>
+
+        <div class="ledger-panel mb-24">
+            <div class="panel-head"><h3>Your visit bookings</h3></div>
+            @if (Model.Visits.Count == 0)
+            {
+                <div class="empty-state"><p>No visits booked yet. <a href="/Animals">Browse animals</a> to book one.</p></div>
+            }
+            else
+            {
+                <table class="ledger">
+                    <thead><tr><th>Animal</th><th>Date</th><th>Time</th><th>Status</th><th></th></tr></thead>
+                    <tbody>
+                        @foreach (var v in Model.Visits)
+                        {
+                            <tr>
+                                <td><a href="/Animals/Details/@v.AnimalId">@v.AnimalName</a></td>
+                                <td class="num-cell">@v.SlotDate.ToString("MMM d, yyyy")</td>
+                                <td class="num-cell">@v.StartTime.ToString(@"hh\:mm")</td>
+                                <td><span class="badge @(v.Status == "Booked" ? "badge-pine" : v.Status == "Cancelled" ? "badge-rust" : "badge-slate")">@v.Status</span></td>
+                                <td>
+                                    @if (v.Status == "Booked")
+                                    {
+                                        <form method="post" asp-page-handler="CancelVisit" asp-route-bookingId="@v.Id">
+                                            <button type="submit" class="btn btn-ghost btn-sm">Cancel</button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+
+        <div class="ledger-panel mb-24">
+            <div class="panel-head"><h3>Your adoption applications</h3></div>
+            @if (Model.Applications.Count == 0)
+            {
+                <div class="empty-state"><p>No applications submitted yet.</p></div>
+            }
+            else
+            {
+                <table class="ledger">
+                    <thead><tr><th>Animal</th><th>Submitted</th><th>Status</th><th>Notes</th></tr></thead>
+                    <tbody>
+                        @foreach (var app in Model.Applications)
+                        {
+                            <tr>
+                                <td><a href="/Animals/Details/@app.AnimalId">@app.AnimalName</a></td>
+                                <td class="num-cell">@app.ApplicationDate.ToString("MMM d, yyyy")</td>
+                                <td><span class="badge @(app.Status == "Approved" ? "badge-pine" : app.Status == "Rejected" ? "badge-rust" : "badge-ochre")">@app.Status</span></td>
+                                <td class="text-faint">@app.RejectionReason</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+
+        <div class="ledger-panel">
+            <div class="panel-head"><h3>Your payments &amp; donations</h3></div>
+            @if (Model.Payments.Count == 0)
+            {
+                <div class="empty-state"><p>No payments yet.</p></div>
+            }
+            else
+            {
+                <table class="ledger">
+                    <thead><tr><th>Type</th><th>Animal / Fund</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+                    <tbody>
+                        @foreach (var p in Model.Payments)
+                        {
+                            <tr>
+                                <td>@p.Type</td>
+                                <td>@(p.AnimalName ?? "General fund")</td>
+                                <td class="num-cell">@p.Amount.ToString("C")</td>
+                                <td><span class="badge @(p.Status == "Completed" ? "badge-pine" : "badge-ochre")">@p.Status</span></td>
+                                <td class="num-cell">@(p.PaymentDate?.ToString("MMM d, yyyy") ?? "—")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</section>

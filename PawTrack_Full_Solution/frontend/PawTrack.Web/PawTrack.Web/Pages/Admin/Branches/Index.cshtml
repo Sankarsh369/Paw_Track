@@ -1,0 +1,75 @@
+@page
+@model PawTrack.Web.Pages.Admin.Branches.IndexModel
+@{
+    ViewData["Title"] = "Branches";
+    ViewData["Nav"] = "admin";
+    ViewData["AdminNav"] = "branches";
+}
+
+<section class="section">
+    <div class="container">
+        <span class="eyebrow">Staff console</span>
+        <h1 class="mt-8 mb-24">Branches</h1>
+        <partial name="/Pages/Admin/_AdminNav.cshtml" />
+
+        @if (Model.ErrorMessage is not null)
+        {
+            <div class="alert alert-error">@Model.ErrorMessage</div>
+        }
+
+        <div class="ledger-panel mb-24">
+            <div class="panel-head"><h3>All branches</h3></div>
+            @if (Model.Branches.Count == 0)
+            {
+                <div class="empty-state"><p>No branches yet — add your first one below.</p></div>
+            }
+            else
+            {
+                <table class="ledger">
+                    <thead><tr><th>Name</th><th>City / Region</th><th>Address</th><th>Phone</th><th></th></tr></thead>
+                    <tbody>
+                        @foreach (var b in Model.Branches)
+                        {
+                            <tr>
+                                <td>@b.Name</td>
+                                <td>@b.RegionCity</td>
+                                <td>@b.Address</td>
+                                <td>@(b.Phone ?? "—")</td>
+                                <td>
+                                    <form method="post" asp-page-handler="Delete" asp-route-id="@b.Id" onsubmit="return confirm('Remove this branch?');">
+                                        <button type="submit" class="btn btn-ghost btn-sm">Remove</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+
+        <div class="form-card">
+            <h3 class="mb-16">Add a branch</h3>
+            <form method="post" asp-page-handler="Create">
+                <div class="field">
+                    <label asp-for="Input.Name">Branch name</label>
+                    <input asp-for="Input.Name" type="text" placeholder="Riverside Rescue Center" />
+                </div>
+                <div class="form-row">
+                    <div class="field">
+                        <label asp-for="Input.RegionCity">City / region</label>
+                        <input asp-for="Input.RegionCity" type="text" />
+                    </div>
+                    <div class="field">
+                        <label asp-for="Input.Phone">Phone</label>
+                        <input asp-for="Input.Phone" type="text" />
+                    </div>
+                </div>
+                <div class="field">
+                    <label asp-for="Input.Address">Address</label>
+                    <input asp-for="Input.Address" type="text" />
+                </div>
+                <button type="submit" class="btn btn-primary">Add branch</button>
+            </form>
+        </div>
+    </div>
+</section>

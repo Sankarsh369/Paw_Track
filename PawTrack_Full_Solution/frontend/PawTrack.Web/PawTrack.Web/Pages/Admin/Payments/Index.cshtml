@@ -1,0 +1,54 @@
+@page
+@model PawTrack.Web.Pages.Admin.Payments.IndexModel
+@{
+    ViewData["Title"] = "Payments";
+    ViewData["Nav"] = "admin";
+    ViewData["AdminNav"] = "payments";
+}
+
+<section class="section">
+    <div class="container">
+        <span class="eyebrow">Staff console</span>
+        <h1 class="mt-8 mb-24">Payments &amp; donations ledger</h1>
+        <partial name="/Pages/Admin/_AdminNav.cshtml" />
+
+        <div class="stat-cards">
+            <div class="stat-card"><span class="num">@Model.TotalDonations.ToString("C0")</span><span class="label">Donations collected</span></div>
+            <div class="stat-card"><span class="num">@Model.TotalFees.ToString("C0")</span><span class="label">Adoption fees collected</span></div>
+            <div class="stat-card"><span class="num">@Model.Payments.Count</span><span class="label">Total transactions</span></div>
+        </div>
+
+        <div class="tabs">
+            <a href="?" class="@(Model.SelectedType == null ? "active" : "")">All</a>
+            <a href="?type=Donation" class="@(Model.SelectedType == "Donation" ? "active" : "")">Donations</a>
+            <a href="?type=AdoptionFee" class="@(Model.SelectedType == "AdoptionFee" ? "active" : "")">Adoption fees</a>
+        </div>
+
+        @if (Model.Payments.Count == 0)
+        {
+            <div class="empty-state"><h3>No transactions yet</h3></div>
+        }
+        else
+        {
+            <div class="ledger-panel">
+                <table class="ledger">
+                    <thead><tr><th>Type</th><th>Animal / fund</th><th>From</th><th>Amount</th><th>Status</th><th>Date</th><th>Transaction ID</th></tr></thead>
+                    <tbody>
+                        @foreach (var p in Model.Payments)
+                        {
+                            <tr>
+                                <td>@p.Type</td>
+                                <td>@(p.AnimalName ?? "General fund")</td>
+                                <td>@(p.DonorName ?? "Anonymous")</td>
+                                <td class="num-cell">@p.Amount.ToString("C")</td>
+                                <td><span class="badge @(p.Status == "Completed" ? "badge-pine" : p.Status == "Failed" ? "badge-rust" : "badge-ochre")">@p.Status</span></td>
+                                <td class="num-cell">@(p.PaymentDate?.ToString("MMM d, yyyy") ?? "—")</td>
+                                <td class="num-cell text-faint">@p.TransactionId</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</section>

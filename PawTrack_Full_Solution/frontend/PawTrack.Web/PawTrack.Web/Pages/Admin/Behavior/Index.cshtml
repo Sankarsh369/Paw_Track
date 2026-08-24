@@ -1,0 +1,84 @@
+@page
+@model PawTrack.Web.Pages.Admin.Behavior.IndexModel
+@{
+    ViewData["Title"] = "Behavior Records";
+    ViewData["Nav"] = "admin";
+    ViewData["AdminNav"] = "behavior";
+}
+
+<section class="section">
+    <div class="container">
+        <span class="eyebrow">Staff console</span>
+        <h1 class="mt-8 mb-24">Behavior assessments</h1>
+        <partial name="/Pages/Admin/_AdminNav.cshtml" />
+
+        @if (Model.ErrorMessage is not null)
+        {
+            <div class="alert alert-error">@Model.ErrorMessage</div>
+        }
+
+        <form method="get" class="filter-bar">
+            <div class="filter-field">
+                <label for="animalId">Animal</label>
+                <select id="animalId" name="animalId" onchange="this.form.submit()">
+                    @foreach (var a in Model.Animals)
+                    {
+                        <option value="@a.Id" selected="@(Model.SelectedAnimalId == a.Id)">@a.Name (@a.BranchName)</option>
+                    }
+                </select>
+            </div>
+        </form>
+
+        <div class="ledger-panel mb-24">
+            <div class="panel-head"><h3>Assessment history</h3></div>
+            @if (Model.Records.Count == 0)
+            {
+                <div class="empty-state"><p>No behavior assessments for this animal yet.</p></div>
+            }
+            else
+            {
+                <table class="ledger">
+                    <thead><tr><th>Date</th><th>Temperament</th><th>Kids</th><th>Other pets</th><th>Assessed by</th></tr></thead>
+                    <tbody>
+                        @foreach (var r in Model.Records)
+                        {
+                            <tr>
+                                <td class="num-cell">@r.AssessedAt.ToString("MMM d, yyyy")</td>
+                                <td>@r.Temperament</td>
+                                <td><span class="badge @(r.CompatibilityWithKids ? "badge-pine" : "badge-slate")">@(r.CompatibilityWithKids ? "Yes" : "No")</span></td>
+                                <td><span class="badge @(r.CompatibilityWithPets ? "badge-pine" : "badge-slate")">@(r.CompatibilityWithPets ? "Yes" : "No")</span></td>
+                                <td>@r.AssessedByName</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+
+        <div class="form-card wide">
+            <h3 class="mb-16">Add assessment</h3>
+            <form method="post" asp-page-handler="Create">
+                <input type="hidden" name="Input.AnimalId" value="@Model.SelectedAnimalId" />
+                <div class="field">
+                    <label asp-for="Input.Temperament">Temperament</label>
+                    <input asp-for="Input.Temperament" type="text" placeholder="e.g. Gentle and curious, warms up quickly" />
+                </div>
+                <div class="form-row">
+                    <div class="field checkbox-row">
+                        <input asp-for="Input.CompatibilityWithKids" type="checkbox" id="kidsCheck" />
+                        <label for="kidsCheck" class="mb-0">Good with kids</label>
+                    </div>
+                    <div class="field checkbox-row">
+                        <input asp-for="Input.CompatibilityWithPets" type="checkbox" id="petsCheck" />
+                        <label for="petsCheck" class="mb-0">Good with other pets</label>
+                    </div>
+                </div>
+                <div class="field">
+                    <label asp-for="Input.SpecialRequirements">Special requirements (optional)</label>
+                    <textarea asp-for="Input.SpecialRequirements"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Save assessment</button>
+            </form>
+        </div>
+    </div>
+</section>

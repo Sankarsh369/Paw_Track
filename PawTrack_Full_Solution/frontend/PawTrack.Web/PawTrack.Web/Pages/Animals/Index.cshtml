@@ -1,0 +1,92 @@
+@page
+@model PawTrack.Web.Pages.Animals.IndexModel
+@{
+    ViewData["Title"] = "Browse Animals";
+    ViewData["Nav"] = "animals";
+}
+
+<section class="section">
+    <div class="container">
+        <div class="section-header" style="max-width:none;">
+            <span class="eyebrow">The board</span>
+            <h1 class="mt-8">Animals waiting for a home</h1>
+            <p>Filter by species, branch, or status. Book a free visit right from any profile.</p>
+        </div>
+
+        <form method="get" class="filter-bar">
+            <div class="filter-field">
+                <label for="species">Species</label>
+                <select id="species" name="species" onchange="this.form.submit()">
+                    <option value="">All species</option>
+                    @foreach (var s in new[] { "Dog", "Cat", "Rabbit", "Bird", "Other" })
+                    {
+                        <option value="@s" selected="@(Model.SelectedSpecies == s)">@s</option>
+                    }
+                </select>
+            </div>
+            <div class="filter-field">
+                <label for="branchId">Branch</label>
+                <select id="branchId" name="branchId" onchange="this.form.submit()">
+                    <option value="">All branches</option>
+                    @foreach (var b in Model.Branches)
+                    {
+                        <option value="@b.Id" selected="@(Model.SelectedBranchId == b.Id)">@b.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="filter-field">
+                <label for="status">Status</label>
+                <select id="status" name="status" onchange="this.form.submit()">
+                    <option value="Available" selected="@(Model.SelectedStatus == "Available" || string.IsNullOrEmpty(Model.SelectedStatus))">Available</option>
+                    <option value="Pending" selected="@(Model.SelectedStatus == "Pending")">Pending application</option>
+                </select>
+            </div>
+            <noscript><button type="submit" class="btn btn-outline btn-sm">Apply filters</button></noscript>
+            <a href="/Animals" class="btn btn-ghost btn-sm">Reset</a>
+        </form>
+
+        @if (Model.Animals.Count == 0)
+        {
+            <div class="empty-state">
+                <h3>No animals match these filters</h3>
+                <p>Try a different species, branch, or status.</p>
+            </div>
+        }
+        else
+        {
+            <div class="card-grid">
+                @foreach (var a in Model.Animals)
+                {
+                    var stampClass = a.Status switch
+                    {
+                        "Available" => "stamp-available",
+                        "Pending" => "stamp-pending",
+                        "Adopted" => "stamp-adopted",
+                        _ => "stamp-assessment"
+                    };
+                    <a class="kennel-card" href="/Animals/Details/@a.Id">
+                        <span class="punch"></span>
+                        <span class="stamp @stampClass">@a.Status</span>
+                        @if (!string.IsNullOrEmpty(a.PhotoUrl))
+                        {
+                            <img class="photo" src="@a.PhotoUrl" alt="@a.Name" />
+                        }
+                        else
+                        {
+                            <div class="photo-fallback">🐾</div>
+                        }
+                        <div class="body">
+                            <div class="kc-eyebrow">Intake #@(1000 + a.Id) · @a.BranchName</div>
+                            <h3>@a.Name</h3>
+                            <div class="breed">@a.Breed · @a.Age yrs · @a.Gender</div>
+                            <div class="meta-row">
+                                <span>@a.Species</span>
+                                <span>Rescued @a.RescueDate.ToString("MMM yyyy")</span>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+        }
+    </div>
+</section>

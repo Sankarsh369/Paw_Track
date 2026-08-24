@@ -1,0 +1,63 @@
+@page
+@model PawTrack.Web.Pages.Admin.AiDescriptions.IndexModel
+@{
+    ViewData["Title"] = "AI Descriptions";
+    ViewData["Nav"] = "admin";
+    ViewData["AdminNav"] = "ai";
+}
+
+<section class="section">
+    <div class="container">
+        <span class="eyebrow">Staff console</span>
+        <h1 class="mt-8 mb-24">AI-generated descriptions</h1>
+        <partial name="/Pages/Admin/_AdminNav.cshtml" />
+
+        @if (Model.ErrorMessage is not null) { <div class="alert alert-error">@Model.ErrorMessage</div> }
+
+        <div class="alert alert-info">
+            Drafts are generated automatically but never shown to adopters until a staff member reviews and approves them here.
+        </div>
+
+        <div class="form-card mb-24">
+            <h3 class="mb-16">Generate a draft</h3>
+            <form method="post" asp-page-handler="Generate" class="flex gap-8">
+                <select name="animalId" style="flex:1;">
+                    @foreach (var a in Model.Animals)
+                    {
+                        <option value="@a.Id">@a.Name (@a.BranchName)</option>
+                    }
+                </select>
+                <button type="submit" class="btn btn-primary">Generate draft</button>
+            </form>
+        </div>
+
+        <div class="ledger-panel">
+            <div class="panel-head"><h3>Pending review (@Model.Pending.Count)</h3></div>
+            @if (Model.Pending.Count == 0)
+            {
+                <div class="empty-state"><p>No drafts waiting for review.</p></div>
+            }
+            else
+            {
+                <div style="padding:18px 22px; display:flex; flex-direction:column; gap:18px;">
+                    @foreach (var d in Model.Pending)
+                    {
+                        <div style="border:1px solid var(--line); border-radius:8px; padding:16px;">
+                            <div class="flex-between mb-8">
+                                <strong>@d.AnimalName</strong>
+                                <span class="text-faint">Generated @d.GeneratedAt.ToString("MMM d, yyyy")</span>
+                            </div>
+                            <form method="post">
+                                <textarea name="finalText" rows="3">@d.GeneratedText</textarea>
+                                <div class="flex gap-8 mt-8">
+                                    <button type="submit" asp-page-handler="Approve" asp-route-id="@d.Id" class="btn btn-primary btn-sm">Approve &amp; publish</button>
+                                    <button type="submit" asp-page-handler="Discard" asp-route-id="@d.Id" class="btn btn-ghost btn-sm">Discard</button>
+                                </div>
+                            </form>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</section>

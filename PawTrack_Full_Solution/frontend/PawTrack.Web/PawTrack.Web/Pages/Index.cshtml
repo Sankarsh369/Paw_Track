@@ -1,0 +1,133 @@
+@page "/"
+@model PawTrack.Web.Pages.IndexModel
+@{
+    ViewData["Title"] = "Home";
+    ViewData["Nav"] = "home";
+}
+
+<section class="hero">
+    <div class="container hero-grid">
+        <div>
+            <span class="eyebrow">Multi-branch rescue network</span>
+            <h1>Every animal tracked, from intake to forever home.</h1>
+            <p class="lede">
+                PawTrack follows each rescue through medical care, behavior assessment, visits,
+                and adoption &mdash; across every branch we run. Browse who's waiting for you right now.
+            </p>
+            <div class="hero-cta">
+                <a href="/Animals" class="btn btn-primary">Browse animals</a>
+                <a href="/Donate" class="btn btn-outline">Donate to a rescue</a>
+            </div>
+            <div class="stat-ledger">
+                <div><span class="num">@Model.AvailableCount</span><span class="label">Available now</span></div>
+                <div><span class="num">@Model.AdoptedCount</span><span class="label">Adopted to date</span></div>
+                <div><span class="num">@Model.BranchCount</span><span class="label">Branches</span></div>
+            </div>
+        </div>
+
+        <div class="hero-cards" aria-hidden="true">
+            @{
+                var sample = Model.Featured.Count > 0 ? Model.Featured : null;
+            }
+            @if (sample is not null)
+            {
+                for (int i = 0; i < Math.Min(3, sample.Count); i++)
+                {
+                    var a = sample[i];
+                    <div class="kennel-card kc-@(i+1)">
+                        <span class="punch"></span>
+                        @if (!string.IsNullOrEmpty(a.PhotoUrl))
+                        {
+                            <img class="photo" src="@a.PhotoUrl" alt="@a.Name" />
+                        }
+                        else
+                        {
+                            <div class="photo-fallback">🐾</div>
+                        }
+                        <div class="body">
+                            <div class="kc-eyebrow">Intake #@(1000 + a.Id)</div>
+                            <h3>@a.Name</h3>
+                            <div class="breed">@a.Breed</div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="kennel-card kc-1"><span class="punch"></span><div class="photo-fallback">🐕</div><div class="body"><div class="kc-eyebrow">Intake #1042</div><h3>Waiting on you</h3><div class="breed">Every branch, one network</div></div></div>
+                <div class="kennel-card kc-2"><span class="punch"></span><div class="photo-fallback">🐈</div><div class="body"><div class="kc-eyebrow">Intake #1055</div><h3>Ready to visit</h3><div class="breed">Book a slot, no obligation</div></div></div>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-header flex-between" style="max-width:none;">
+            <div>
+                <span class="eyebrow">On the board</span>
+                <h2 class="mt-8">Recently available</h2>
+            </div>
+            <a href="/Animals" class="btn btn-outline">See all animals</a>
+        </div>
+
+        @if (Model.Featured.Count == 0)
+        {
+            <div class="empty-state">
+                <h3>No animals listed yet</h3>
+                <p>Once staff add intake records, they'll appear here for adopters to browse.</p>
+            </div>
+        }
+        else
+        {
+            <div class="card-grid">
+                @foreach (var a in Model.Featured)
+                {
+                    <a class="kennel-card" href="/Animals/Details/@a.Id">
+                        <span class="punch"></span>
+                        <span class="stamp stamp-available">Available</span>
+                        @if (!string.IsNullOrEmpty(a.PhotoUrl))
+                        {
+                            <img class="photo" src="@a.PhotoUrl" alt="@a.Name" />
+                        }
+                        else
+                        {
+                            <div class="photo-fallback">🐾</div>
+                        }
+                        <div class="body">
+                            <div class="kc-eyebrow">Intake #@(1000 + a.Id) · @a.BranchName</div>
+                            <h3>@a.Name</h3>
+                            <div class="breed">@a.Breed · @a.Age yrs · @a.Gender</div>
+                            <div class="meta-row">
+                                <span>Rescued @a.RescueDate.ToString("MMM yyyy")</span>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+<section class="section section-tight">
+    <div class="container">
+        <hr class="rule mb-24" />
+        <div class="card-grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
+            <div>
+                <span class="eyebrow">01 · Visit</span>
+                <h3 class="mt-8">Book a free visit</h3>
+                <p>Pick a branch and a time slot to meet an animal in person &mdash; no reservation required.</p>
+            </div>
+            <div>
+                <span class="eyebrow">02 · Apply</span>
+                <h3 class="mt-8">Submit an application</h3>
+                <p>Staff review every application against the animal's medical and behavior records.</p>
+            </div>
+            <div>
+                <span class="eyebrow">03 · Adopt</span>
+                <h3 class="mt-8">Bring them home</h3>
+                <p>Once approved, we follow up after adoption to make sure the fit is a good one.</p>
+            </div>
+        </div>
+    </div>
+</section>

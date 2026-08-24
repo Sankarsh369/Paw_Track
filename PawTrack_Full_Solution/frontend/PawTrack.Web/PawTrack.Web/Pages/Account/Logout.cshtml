@@ -1,0 +1,14 @@
+@page
+@model PawTrack.Web.Pages.Account.LogoutModel
+@{
+    ViewData["Title"] = "Log out";
+}
+
+<div class="section container text-center">
+    <span class="eyebrow">Account</span>
+    <h1 class="mt-8">Log out of PawTrack?</h1>
+    <p class="text-soft">You'll need to log back in to access your dashboard.</p>
+    <form method="post" asp-page="/Account/Logout" class="mt-16">
+        <button type="submit" class="btn btn-primary">Yes, log me out</button>
+    </form>
+</div>

@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "..\\..\\frontend\\PawTrack.Web\\PawTrack.Web\\PawTrack.Web.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "PawTrack.Api\\PawTrack.Api.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

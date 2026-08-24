@@ -1,0 +1,15 @@
+@{
+    var current = ViewData["AdminNav"] as string;
+}
+<div class="tabs">
+    <a href="/Admin" class="@(current == "overview" ? "active" : "")">Overview</a>
+    <a href="/Admin/Animals" class="@(current == "animals" ? "active" : "")">Animals</a>
+    <a href="/Admin/Medical" class="@(current == "medical" ? "active" : "")">Medical</a>
+    <a href="/Admin/Behavior" class="@(current == "behavior" ? "active" : "")">Behavior</a>
+    <a href="/Admin/Visits" class="@(current == "visits" ? "active" : "")">Visits</a>
+    <a href="/Admin/Applications" class="@(current == "applications" ? "active" : "")">Applications</a>
+    <a href="/Admin/Adoptions" class="@(current == "adoptions" ? "active" : "")">Adoptions</a>
+    <a href="/Admin/Payments" class="@(current == "payments" ? "active" : "")">Payments</a>
+    <a href="/Admin/AiDescriptions" class="@(current == "ai" ? "active" : "")">AI Descriptions</a>
+    <a href="/Admin/Branches" class="@(current == "branches" ? "active" : "")">Branches</a>
+</div>

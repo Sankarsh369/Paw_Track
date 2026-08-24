@@ -1,0 +1,80 @@
+@page
+@model PawTrack.Web.Pages.Admin.Adoptions.IndexModel
+@{
+    ViewData["Title"] = "Adoptions";
+    ViewData["Nav"] = "admin";
+    ViewData["AdminNav"] = "adoptions";
+}
+
+<section class="section">
+    <div class="container">
+        <span class="eyebrow">Staff console</span>
+        <h1 class="mt-8 mb-24">Completed adoptions &amp; follow-ups</h1>
+        <partial name="/Pages/Admin/_AdminNav.cshtml" />
+
+        @if (Model.ErrorMessage is not null) { <div class="alert alert-error">@Model.ErrorMessage</div> }
+        @if (Model.SuccessMessage is not null) { <div class="alert alert-success">@Model.SuccessMessage</div> }
+
+        <div class="ledger-panel mb-24">
+            <div class="panel-head"><h3>Adoptions (@Model.Adoptions.Count)</h3></div>
+            @if (Model.Adoptions.Count == 0)
+            {
+                <div class="empty-state"><p>No adoptions finalized yet.</p></div>
+            }
+            else
+            {
+                <table class="ledger">
+                    <thead><tr><th>Animal</th><th>Adopter</th><th>Approved by</th><th>Adoption date</th></tr></thead>
+                    <tbody>
+                        @foreach (var a in Model.Adoptions)
+                        {
+                            <tr>
+                                <td><a href="/Animals/Details/@a.AnimalId">@a.AnimalName</a></td>
+                                <td>@a.AdopterName</td>
+                                <td>@a.ApprovedByName</td>
+                                <td class="num-cell">@a.AdoptionDate.ToString("MMM d, yyyy")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+
+        @if (Model.Adoptions.Count > 0)
+        {
+            <div class="form-card wide">
+                <h3 class="mb-16">Log a follow-up</h3>
+                <form method="post" asp-page-handler="FollowUp">
+                    <div class="form-row">
+                        <div class="field">
+                            <label asp-for="Input.AdoptionId">Adoption</label>
+                            <select asp-for="Input.AdoptionId">
+                                @foreach (var a in Model.Adoptions)
+                                {
+                                    <option value="@a.Id">@a.AnimalName · @a.AdopterName</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label asp-for="Input.FollowUpDate">Date</label>
+                            <input asp-for="Input.FollowUpDate" type="date" />
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label asp-for="Input.Status">Status</label>
+                        <select asp-for="Input.Status">
+                            <option value="Scheduled">Scheduled</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Missed">Missed</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label asp-for="Input.Notes">Notes</label>
+                        <textarea asp-for="Input.Notes" placeholder="How is the adjustment going?"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save follow-up</button>
+                </form>
+            </div>
+        }
+    </div>
+</section>

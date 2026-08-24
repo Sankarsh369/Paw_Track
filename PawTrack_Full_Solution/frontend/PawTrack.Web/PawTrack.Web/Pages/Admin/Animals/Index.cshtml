@@ -1,0 +1,137 @@
+@page
+@model PawTrack.Web.Pages.Admin.Animals.IndexModel
+@{
+    ViewData["Title"] = "Manage Animals";
+    ViewData["Nav"] = "admin";
+    ViewData["AdminNav"] = "animals";
+}
+
+<section class="section">
+    <div class="container">
+        <span class="eyebrow">Staff console</span>
+        <h1 class="mt-8 mb-24">Animals</h1>
+        <partial name="/Pages/Admin/_AdminNav.cshtml" />
+
+        @if (Model.ErrorMessage is not null)
+        {
+            <div class="alert alert-error">@Model.ErrorMessage</div>
+        }
+
+        <div class="ledger-panel mb-24">
+            <div class="panel-head"><h3>All animals (@Model.Animals.Count)</h3></div>
+            @if (Model.Animals.Count == 0)
+            {
+                <div class="empty-state"><p>No animals recorded yet — add an intake below.</p></div>
+            }
+            else
+            {
+                <table class="ledger">
+                    <thead><tr><th>Name</th><th>Species / Breed</th><th>Branch</th><th>Age</th><th>Status</th><th>Update status</th></tr></thead>
+                    <tbody>
+                        @foreach (var a in Model.Animals)
+                        {
+                            <tr>
+                                <td><a href="/Animals/Details/@a.Id">@a.Name</a></td>
+                                <td>@a.Species · @a.Breed</td>
+                                <td>@a.BranchName</td>
+                                <td class="num-cell">@a.Age</td>
+                                <td><span class="badge @(a.Status == "Available" ? "badge-pine" : a.Status == "Pending" ? "badge-ochre" : a.Status == "Adopted" ? "badge-rust" : "badge-slate")">@a.Status</span></td>
+                                <td>
+                                    <form method="post" asp-page-handler="UpdateStatus" asp-route-id="@a.Id" class="flex gap-8">
+                                        <select name="status" style="width:auto;padding:6px 8px;">
+                                            @foreach (var st in new[] { "UnderAssessment", "Available", "Pending", "Adopted" })
+                                            {
+                                                <option value="@st" selected="@(a.Status == st)">@st</option>
+                                            }
+                                        </select>
+                                        <button type="submit" class="btn btn-ghost btn-sm">Save</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+
+        <div class="form-card wide">
+            <h3 class="mb-16">Add new intake</h3>
+            <form method="post" asp-page-handler="Create">
+                <div class="form-row">
+                    <div class="field">
+                        <label asp-for="Input.Name">Name</label>
+                        <input asp-for="Input.Name" type="text" />
+                    </div>
+                    <div class="field">
+                        <label asp-for="Input.Species">Species</label>
+                        <select asp-for="Input.Species">
+                            @foreach (var s in new[] { "Dog", "Cat", "Rabbit", "Bird", "Other" })
+                            {
+                                <option value="@s">@s</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="field">
+                        <label asp-for="Input.Breed">Breed</label>
+                        <input asp-for="Input.Breed" type="text" />
+                    </div>
+                    <div class="field">
+                        <label asp-for="Input.Age">Age (years)</label>
+                        <input asp-for="Input.Age" type="number" min="0" max="40" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="field">
+                        <label asp-for="Input.Gender">Gender</label>
+                        <select asp-for="Input.Gender">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Unknown">Unknown</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label asp-for="Input.CategoryId">Category</label>
+                        <select asp-for="Input.CategoryId">
+                            @foreach (var c in Model.Categories)
+                            {
+                                <option value="@c.Id">@c.Name</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="field">
+                        <label asp-for="Input.BranchId">Branch</label>
+                        <select asp-for="Input.BranchId">
+                            @foreach (var b in Model.Branches)
+                            {
+                                <option value="@b.Id">@b.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label asp-for="Input.RescueDate">Rescue date</label>
+                        <input asp-for="Input.RescueDate" type="date" />
+                    </div>
+                </div>
+                <div class="field">
+                    <label asp-for="Input.RescueLocation">Rescue location</label>
+                    <input asp-for="Input.RescueLocation" type="text" placeholder="e.g. Highway 9 overpass" />
+                </div>
+                <div class="form-row">
+                    <div class="field">
+                        <label asp-for="Input.PhotoUrl">Photo URL (optional)</label>
+                        <input asp-for="Input.PhotoUrl" type="text" placeholder="https://…" />
+                    </div>
+                    <div class="field">
+                        <label asp-for="Input.MicrochipNumber">Microchip # (optional)</label>
+                        <input asp-for="Input.MicrochipNumber" type="text" />
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Add animal</button>
+            </form>
+        </div>
+    </div>
+</section>

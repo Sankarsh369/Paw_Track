@@ -1,0 +1,146 @@
+@page
+@model PawTrack.Web.Pages.DonateModel
+@{
+    ViewData["Title"] = "Donate";
+    ViewData["Nav"] = "donate";
+}
+
+<section class="section">
+    <div class="container" style="max-width:680px;">
+        <span class="eyebrow">Support the network</span>
+        <h1 class="mt-8">
+            @(Model.TargetAnimal is not null ? $"Donate toward {Model.TargetAnimal.Name}'s care" : "Donate to the general fund")
+        </h1>
+        <p class="mb-24">
+            @(Model.TargetAnimal is not null
+                ? $"Every rupee helps cover {Model.TargetAnimal.Name}'s food, vet visits, and shelter until adoption."
+                : "Your donation is shared across every branch to cover food, veterinary care, and shelter costs.")
+        </p>
+
+        @if (Model.Confirmed)
+        {
+            <div class="alert alert-success">
+                Thank you! Your donation was recorded (transaction @Model.TransactionId). It means a lot.
+            </div>
+            <a href="/Animals" class="btn btn-primary">Browse more animals</a>
+        }
+        else if (Model.RazorpayOrderId is not null)
+        {
+            <div class="form-card wide text-center">
+                <p>Redirecting you to secure checkout…</p>
+                <p class="text-faint">If nothing happens, <button type="button" id="retryBtn" class="btn btn-outline btn-sm">click here to open checkout</button>.</p>
+            </div>
+        }
+        else
+        {
+            <div class="form-card wide">
+                @if (Model.ErrorMessage is not null)
+                {
+                    <div class="alert alert-error">@Model.ErrorMessage</div>
+                }
+
+                @if (Model.TargetAnimal is not null)
+                {
+                    <div class="flex gap-16 mb-24" style="align-items:center;">
+                        @if (!string.IsNullOrEmpty(Model.TargetAnimal.PhotoUrl))
+                        {
+                            <img src="@Model.TargetAnimal.PhotoUrl" alt="@Model.TargetAnimal.Name" style="width:64px;height:64px;border-radius:8px;object-fit:cover;" />
+                        }
+                        <div>
+                            <strong>@Model.TargetAnimal.Name</strong>
+                            <div class="text-faint">@Model.TargetAnimal.Breed · @Model.TargetAnimal.BranchName</div>
+                        </div>
+                    </div>
+                }
+
+                <form method="post">
+                    <input type="hidden" asp-for="Input.AnimalId" />
+
+                    <div class="field">
+                        <label>Amount (₹)</label>
+                        <div class="flex gap-8 mb-8">
+                            @foreach (var amt in new[] { 100, 250, 500, 1000 })
+                            {
+                                <button type="button" class="btn btn-outline btn-sm preset-amt" data-amt="@amt">₹@amt</button>
+                            }
+                        </div>
+                        <input asp-for="Input.Amount" type="number" min="1" step="1" id="amountInput" />
+                        <span asp-validation-for="Input.Amount" class="text-faint"></span>
+                    </div>
+
+                    <div class="field checkbox-row">
+                        <input asp-for="Input.Anonymous" type="checkbox" id="anonCheck" />
+                        <label for="anonCheck" class="mb-0">Donate anonymously</label>
+                    </div>
+
+                    <p class="text-faint mb-16">
+                        You'll be taken to Razorpay's secure checkout to complete payment (test mode).
+                    </p>
+
+                    <button type="submit" class="btn btn-primary btn-block">Donate</button>
+                </form>
+            </div>
+        }
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.preset-amt').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('amountInput').value = btn.dataset.amt;
+            });
+        });
+    </script>
+
+    @if (Model.RazorpayOrderId is not null)
+    {
+        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+        <script>
+            function openRazorpayCheckout() {
+                var options = {
+                    key: "@Model.RazorpayKeyId",
+                    amount: "@((int)(Model.Input.Amount * 100))",
+                    currency: "INR",
+                    name: "PawTrack",
+                    description: "@(Model.TargetAnimal is not null ? $"Donation for {Model.TargetAnimal.Name}" : "General fund donation")",
+                    order_id: "@Model.RazorpayOrderId",
+                    handler: function (response) {
+                        fetch("/Donate?handler=Verify", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                razorpayOrderId: response.razorpay_order_id,
+                                razorpayPaymentId: response.razorpay_payment_id,
+                                razorpaySignature: response.razorpay_signature
+                            })
+                        })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.success) {
+                                window.location.href = "/Donate?success=true&txn=" + encodeURIComponent(data.transactionId);
+                            } else {
+                                alert("Payment could not be verified: " + (data.message || "unknown error"));
+                                window.location.href = "/Donate";
+                            }
+                        })
+                        .catch(() => {
+                            alert("Something went wrong verifying the payment.");
+                            window.location.href = "/Donate";
+                        });
+                    },
+                    modal: {
+                        ondismiss: function () {
+                            window.location.href = "/Donate";
+                        }
+                    },
+                    theme: { color: "#2E5339" }
+                };
+                var rzp = new Razorpay(options);
+                rzp.open();
+            }
+            document.addEventListener("DOMContentLoaded", openRazorpayCheckout);
+            document.getElementById("retryBtn")?.addEventListener("click", openRazorpayCheckout);
+        </script>
+    }
+}

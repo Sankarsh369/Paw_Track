@@ -1,0 +1,131 @@
+@page "/Animals/Details/{id:int}"
+@model PawTrack.Web.Pages.Animals.DetailsModel
+@{
+    ViewData["Title"] = Model.Animal?.Name ?? "Animal";
+    ViewData["Nav"] = "animals";
+}
+
+@if (Model.Animal is null)
+{
+    <div class="section container"><div class="empty-state"><h3>Animal not found</h3></div></div>
+}
+else
+{
+    var a = Model.Animal;
+    var stampClass = a.Status switch
+    {
+        "Available" => "stamp-available",
+        "Pending" => "stamp-pending",
+        "Adopted" => "stamp-adopted",
+        _ => "stamp-assessment"
+    };
+
+    <section class="section">
+        <div class="container">
+            @if (Model.FeedbackMessage is not null)
+            {
+                <div class="alert alert-success">@Model.FeedbackMessage</div>
+            }
+            @if (Model.ErrorMessage is not null)
+            {
+                <div class="alert alert-error">@Model.ErrorMessage</div>
+            }
+
+            <div class="detail-grid">
+                <div>
+                    @if (!string.IsNullOrEmpty(a.PhotoUrl))
+                    {
+                        <img class="detail-photo" src="@a.PhotoUrl" alt="@a.Name" />
+                    }
+                    else
+                    {
+                        <div class="detail-photo-fallback">🐾</div>
+                    }
+                    <div class="detail-id">Intake #@(1000 + a.Id) · Microchip @(a.MicrochipNumber ?? "—") · @a.BranchName</div>
+                </div>
+
+                <div>
+                    <span class="badge @(stampClass == "stamp-available" ? "badge-pine" : stampClass == "stamp-pending" ? "badge-ochre" : "badge-rust")">@a.Status</span>
+                    <h1 class="mt-8 mb-0">@a.Name</h1>
+                    <p class="text-soft">@a.Breed · @a.Species</p>
+
+                    <div class="detail-facts">
+                        <div class="detail-fact"><span class="v">@a.Age</span><span class="k">Years old</span></div>
+                        <div class="detail-fact"><span class="v">@a.Gender</span><span class="k">Gender</span></div>
+                        <div class="detail-fact"><span class="v">@a.RescueDate.ToString("MMM yyyy")</span><span class="k">Rescued</span></div>
+                        <div class="detail-fact"><span class="v">@a.CategoryName</span><span class="k">Category</span></div>
+                    </div>
+
+                    @if (Model.AiDescription is not null)
+                    {
+                        <p>@Model.AiDescription.GeneratedText</p>
+                    }
+                    else
+                    {
+                        <p>@a.Name was rescued from @a.RescueLocation and is currently in the care of our @a.BranchName branch, waiting for the right family.</p>
+                    }
+
+                    @if (Model.BehaviorRecords.Count > 0)
+                    {
+                        var b = Model.BehaviorRecords.First();
+                        <h3 class="mt-24">Temperament</h3>
+                        <p>@b.Temperament</p>
+                        <div class="flex gap-8 mb-16">
+                            <span class="badge @(b.CompatibilityWithKids ? "badge-pine" : "badge-slate")">
+                                @(b.CompatibilityWithKids ? "Good with kids" : "Best without young kids")
+                            </span>
+                            <span class="badge @(b.CompatibilityWithPets ? "badge-pine" : "badge-slate")">
+                                @(b.CompatibilityWithPets ? "Good with other pets" : "Prefers to be the only pet")
+                            </span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(b.SpecialRequirements))
+                        {
+                            <p class="text-faint">Special requirements: @b.SpecialRequirements</p>
+                        }
+                    }
+
+                    <hr class="rule mt-24 mb-24" />
+
+                    <div class="form-row">
+                        <div>
+                            <h3>Book a free visit</h3>
+                            @if (Model.AvailableSlots.Count == 0)
+                            {
+                                <p class="text-faint">No open visit slots right now — check back soon, or ask our chat assistant.</p>
+                            }
+                            else
+                            {
+                                <form method="post" asp-page-handler="BookVisit" asp-route-id="@a.Id">
+                                    <div class="slot-list mb-16">
+                                        @foreach (var slot in Model.AvailableSlots)
+                                        {
+                                            <label class="slot-option">
+                                                <span class="flex gap-8">
+                                                    <input type="radio" name="slotId" value="@slot.Id" required />
+                                                    <span class="slot-meta">@slot.SlotDate.ToString("ddd, MMM d") · @slot.StartTime.ToString(@"hh\:mm") &ndash; @slot.EndTime.ToString(@"hh\:mm")</span>
+                                                </span>
+                                                <span class="slot-cap">@(slot.Capacity - slot.BookedCount) spots left</span>
+                                            </label>
+                                        }
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-block">Book visit</button>
+                                </form>
+                            }
+                        </div>
+
+                        <div>
+                            <h3>Ready to adopt?</h3>
+                            <p class="text-faint">Staff will review your application against @a.Name's medical and behavior records.</p>
+                            <form method="post" asp-page-handler="Apply" asp-route-id="@a.Id">
+                                <button type="submit" class="btn btn-rust btn-block" @(a.Status == "Adopted" ? "disabled" : "")>
+                                    @(a.Status == "Adopted" ? "Already adopted" : "Apply to adopt")
+                                </button>
+                            </form>
+                            <a href="/Donate?animalId=@a.Id" class="btn btn-outline btn-block mt-8">Donate toward @a.Name's care</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+}

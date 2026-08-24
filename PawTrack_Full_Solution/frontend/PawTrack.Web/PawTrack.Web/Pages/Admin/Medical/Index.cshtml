@@ -1,0 +1,94 @@
+@page
+@model PawTrack.Web.Pages.Admin.Medical.IndexModel
+@{
+    ViewData["Title"] = "Medical Records";
+    ViewData["Nav"] = "admin";
+    ViewData["AdminNav"] = "medical";
+}
+
+<section class="section">
+    <div class="container">
+        <span class="eyebrow">Staff console</span>
+        <h1 class="mt-8 mb-24">Medical records</h1>
+        <partial name="/Pages/Admin/_AdminNav.cshtml" />
+
+        @if (Model.ErrorMessage is not null)
+        {
+            <div class="alert alert-error">@Model.ErrorMessage</div>
+        }
+
+        <form method="get" class="filter-bar">
+            <div class="filter-field">
+                <label for="animalId">Animal</label>
+                <select id="animalId" name="animalId" onchange="this.form.submit()">
+                    @foreach (var a in Model.Animals)
+                    {
+                        <option value="@a.Id" selected="@(Model.SelectedAnimalId == a.Id)">@a.Name (@a.BranchName)</option>
+                    }
+                </select>
+            </div>
+        </form>
+
+        <div class="ledger-panel mb-24">
+            <div class="panel-head"><h3>Checkup history</h3></div>
+            @if (Model.Records.Count == 0)
+            {
+                <div class="empty-state"><p>No medical records for this animal yet.</p></div>
+            }
+            else
+            {
+                <table class="ledger">
+                    <thead><tr><th>Checkup date</th><th>Diagnosis</th><th>Treatment</th><th>Medication</th><th>Vet</th><th>Vaccinated</th></tr></thead>
+                    <tbody>
+                        @foreach (var r in Model.Records)
+                        {
+                            <tr>
+                                <td class="num-cell">@r.CheckupDate.ToString("MMM d, yyyy")</td>
+                                <td>@r.Diagnosis</td>
+                                <td>@(r.Treatment ?? "—")</td>
+                                <td>@(r.Medication ?? "—")</td>
+                                <td>@r.VeterinarianName</td>
+                                <td class="num-cell">@(r.VaccinationDate?.ToString("MMM d, yyyy") ?? "—")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+
+        @if (Model.CanRecord)
+        {
+            <div class="form-card wide">
+                <h3 class="mb-16">Log a checkup</h3>
+                <form method="post" asp-page-handler="Create">
+                    <input type="hidden" name="Input.AnimalId" value="@Model.SelectedAnimalId" />
+                    <div class="form-row">
+                        <div class="field">
+                            <label asp-for="Input.Diagnosis">Diagnosis</label>
+                            <input asp-for="Input.Diagnosis" type="text" />
+                        </div>
+                        <div class="field">
+                            <label asp-for="Input.CheckupDate">Checkup date</label>
+                            <input asp-for="Input.CheckupDate" type="date" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="field">
+                            <label asp-for="Input.Treatment">Treatment</label>
+                            <input asp-for="Input.Treatment" type="text" />
+                        </div>
+                        <div class="field">
+                            <label asp-for="Input.Medication">Medication</label>
+                            <input asp-for="Input.Medication" type="text" />
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label asp-for="Input.VaccinationDate">Vaccination date (optional)</label>
+                        <input asp-for="Input.VaccinationDate" type="date" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save record</button>
+                </form>
+            </div>
+        }
+    </div>
+</section>

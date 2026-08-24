@@ -1,0 +1,130 @@
+@page
+@model PawTrack.Web.Pages.Admin.Visits.IndexModel
+@{
+    ViewData["Title"] = "Visits";
+    ViewData["Nav"] = "admin";
+    ViewData["AdminNav"] = "visits";
+}
+
+<section class="section">
+    <div class="container">
+        <span class="eyebrow">Staff console</span>
+        <h1 class="mt-8 mb-24">Visit scheduling</h1>
+        <partial name="/Pages/Admin/_AdminNav.cshtml" />
+
+        @if (Model.ErrorMessage is not null)
+        {
+            <div class="alert alert-error">@Model.ErrorMessage</div>
+        }
+
+        <form method="get" class="filter-bar">
+            <div class="filter-field">
+                <label for="branchId">Branch</label>
+                <select id="branchId" name="branchId" onchange="this.form.submit()">
+                    @foreach (var b in Model.Branches)
+                    {
+                        <option value="@b.Id" selected="@(Model.SelectedBranchId == b.Id)">@b.Name</option>
+                    }
+                </select>
+            </div>
+        </form>
+
+        <div class="ledger-panel mb-24">
+            <div class="panel-head"><h3>Upcoming slots</h3></div>
+            @if (Model.Slots.Count == 0)
+            {
+                <div class="empty-state"><p>No visit slots created yet for this branch.</p></div>
+            }
+            else
+            {
+                <table class="ledger">
+                    <thead><tr><th>Date</th><th>Time</th><th>Capacity</th><th>Booked</th><th></th></tr></thead>
+                    <tbody>
+                        @foreach (var s in Model.Slots)
+                        {
+                            <tr>
+                                <td class="num-cell">@s.SlotDate.ToString("ddd, MMM d")</td>
+                                <td class="num-cell">@s.StartTime.ToString(@"hh\:mm") – @s.EndTime.ToString(@"hh\:mm")</td>
+                                <td class="num-cell">@s.Capacity</td>
+                                <td class="num-cell">@s.BookedCount @(s.IsFull ? "(full)" : "")</td>
+                                <td>
+                                    @if (Model.CanManageSlots)
+                                    {
+                                        <form method="post" asp-page-handler="DeleteSlot" asp-route-slotId="@s.Id" asp-route-branchId="@Model.SelectedBranchId">
+                                            <button type="submit" class="btn btn-ghost btn-sm">Remove</button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+
+        <div class="ledger-panel mb-24">
+            <div class="panel-head"><h3>Bookings</h3></div>
+            @if (Model.Bookings.Count == 0)
+            {
+                <div class="empty-state"><p>No bookings for this branch yet.</p></div>
+            }
+            else
+            {
+                <table class="ledger">
+                    <thead><tr><th>Animal</th><th>Adopter</th><th>Date / time</th><th>Status</th><th>Mark as</th></tr></thead>
+                    <tbody>
+                        @foreach (var b in Model.Bookings)
+                        {
+                            <tr>
+                                <td>@b.AnimalName</td>
+                                <td>@b.AdopterName</td>
+                                <td class="num-cell">@b.SlotDate.ToString("MMM d") @b.StartTime.ToString(@"hh\:mm")</td>
+                                <td><span class="badge @(b.Status == "Booked" ? "badge-ochre" : b.Status == "Completed" ? "badge-pine" : b.Status == "Cancelled" || b.Status == "NoShow" ? "badge-rust" : "badge-slate")">@b.Status</span></td>
+                                <td>
+                                    <form method="post" asp-page-handler="Mark" asp-route-bookingId="@b.Id" asp-route-branchId="@Model.SelectedBranchId" class="flex gap-8">
+                                        <select name="status" style="width:auto;padding:6px 8px;">
+                                            @foreach (var st in new[] { "Booked", "CheckedIn", "Completed", "Cancelled", "NoShow" })
+                                            {
+                                                <option value="@st" selected="@(b.Status == st)">@st</option>
+                                            }
+                                        </select>
+                                        <button type="submit" class="btn btn-ghost btn-sm">Save</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+
+        @if (Model.CanManageSlots)
+        {
+            <div class="form-card">
+                <h3 class="mb-16">Open a new visit slot</h3>
+                <form method="post" asp-page-handler="CreateSlot">
+                    <input type="hidden" asp-for="Input.BranchId" value="@Model.SelectedBranchId" />
+                    <div class="field">
+                        <label asp-for="Input.SlotDate">Date</label>
+                        <input asp-for="Input.SlotDate" type="date" />
+                    </div>
+                    <div class="form-row">
+                        <div class="field">
+                            <label asp-for="Input.StartTime">Start time</label>
+                            <input asp-for="Input.StartTime" type="time" />
+                        </div>
+                        <div class="field">
+                            <label asp-for="Input.EndTime">End time</label>
+                            <input asp-for="Input.EndTime" type="time" />
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label asp-for="Input.Capacity">Capacity</label>
+                        <input asp-for="Input.Capacity" type="number" min="1" max="100" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create slot</button>
+                </form>
+            </div>
+        }
+    </div>
+</section>
