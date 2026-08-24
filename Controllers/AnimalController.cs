@@ -17,16 +17,18 @@ namespace PawTrack.Api.Controllers
             _animalService = animalService;
         }
 
-        // GET api/animal
+        // GET api/animal — public: adopters browse without an account
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<List<AnimalDto>>> GetAll()
         {
             var animals = await _animalService.GetAllAsync();
             return Ok(animals);
         }
 
-        // GET api/animal/5
+        // GET api/animal/5 — public
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<AnimalDto>> GetById(int id)
         {
             var animal = await _animalService.GetByIdAsync(id);
@@ -39,8 +41,15 @@ namespace PawTrack.Api.Controllers
         [Authorize(Roles = "OrgAdmin,BranchAdmin,RescueStaff")]
         public async Task<ActionResult<AnimalDto>> Create([FromBody] CreateAnimalDto dto)
         {
-            var created = await _animalService.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            try
+            {
+                var created = await _animalService.CreateAsync(dto);
+                return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         // PUT api/animal/5
