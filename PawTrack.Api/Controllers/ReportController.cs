@@ -17,7 +17,6 @@ namespace PawTrack.Api.Controllers
             _reportService = reportService;
         }
 
-        // GET api/report/org
         [HttpGet("org")]
         [Authorize(Roles = "OrgAdmin")]
         public async Task<ActionResult<OrgDashboardDto>> GetOrgDashboard()
@@ -25,7 +24,6 @@ namespace PawTrack.Api.Controllers
             return Ok(await _reportService.GetOrgDashboardAsync());
         }
 
-        // GET api/report/branch/5
         [HttpGet("branch/{branchId}")]
         public async Task<ActionResult<BranchReportDto>> GetBranchReport(int branchId)
         {

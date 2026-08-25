@@ -11,11 +11,17 @@ namespace PawTrack.Api.Controllers
     public class CategoryController : ControllerBase
     {
         private readonly PawTrackDbContext _db;
-        public CategoryController(PawTrackDbContext db) => _db = db;
+
+        public CategoryController(PawTrackDbContext db)
+        {
+            _db = db;
+        }
 
         [HttpGet]
-        public async Task<ActionResult<List<Category>>> GetAll() =>
-            Ok(await _db.Categories.ToListAsync());
+        public async Task<ActionResult<List<Category>>> GetAll()
+        {
+            return Ok(await _db.Categories.ToListAsync());
+        }
 
         [HttpPost]
         [Authorize(Roles = "OrgAdmin,BranchAdmin")]
@@ -31,7 +37,10 @@ namespace PawTrack.Api.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var category = await _db.Categories.FindAsync(id);
-            if (category is null) return NotFound();
+            if (category is null)
+            {
+                return NotFound();
+            }
 
             _db.Categories.Remove(category);
             await _db.SaveChangesAsync();

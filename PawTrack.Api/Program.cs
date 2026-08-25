@@ -67,6 +67,7 @@ namespace PawTrack.Api
             builder.Services.AddAuthorization();
             builder.Services.AddScoped<IAnimalService, AnimalService>();
             builder.Services.AddScoped<IMedicalService, MedicalService>();
+            builder.Services.AddScoped<IReportService, ReportService>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
