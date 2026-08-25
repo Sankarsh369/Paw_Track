@@ -1,23 +1,31 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using PawTrack.Api.Data;
 using PawTrack.Api.DTOs.AI;
 using PawTrack.Api.Models;
+using System.Text;
+using System.Text.Json;
 
 namespace PawTrack.Api.Services
 {
     public class AiDescriptionService : IAiDescriptionService
     {
         private readonly PawTrackDbContext _context;
+        private readonly HttpClient _httpClient;
+        private readonly IConfiguration _configuration;
 
-        public AiDescriptionService(PawTrackDbContext context)
+        public AiDescriptionService(PawTrackDbContext context, HttpClient httpClient, IConfiguration configuration)
         {
             _context = context;
+            _httpClient = httpClient;
+            _configuration = configuration;
         }
 
-        // NOTE: This uses a template-based generator so the module works fully offline
-        // with no external API key required. To use a real LLM instead, swap the body
-        // of BuildDraftText() for a call to your provider of choice (e.g. the Anthropic
-        // Messages API) — everything else (approval workflow, storage) stays the same.
+        public AiDescriptionService(PawTrackDbContext context)
+            : this(context, new HttpClient(), new ConfigurationBuilder().AddEnvironmentVariables().Build())
+        {
+        }
+
         public async Task<AIGeneratedDescriptionDto> GenerateAsync(GenerateDescriptionDto dto)
         {
             var animal = await _context.Animals
@@ -32,11 +40,13 @@ namespace PawTrack.Api.Services
                 .OrderByDescending(b => b.AssessedAt)
                 .FirstOrDefaultAsync();
 
+            var generatedText = await CallGeminiApiAsync(animal, behavior);
+
             var description = new AIGeneratedDescription
             {
                 AnimalId = animal.Id,
-                GeneratedText = BuildDraftText(animal, behavior),
-                ModelVersion = "pawtrack-template-v1",
+                GeneratedText = generatedText,
+                ModelVersion = "gemini-2.5-flash",
                 IsApproved = false
             };
 
@@ -48,13 +58,14 @@ namespace PawTrack.Api.Services
 
         public async Task<List<AIGeneratedDescriptionDto>> GetPendingAsync()
         {
-            return await _context.AIGeneratedDescriptions
+            var list = await _context.AIGeneratedDescriptions
                 .Include(d => d.Animal)
                 .Include(d => d.ReviewedBy)
                 .Where(d => !d.IsApproved)
                 .OrderByDescending(d => d.GeneratedAt)
-                .Select(d => ToDto(d))
                 .ToListAsync();
+
+            return list.Select(d => ToDto(d, null)).ToList();
         }
 
         public async Task<AIGeneratedDescriptionDto?> GetForAnimalAsync(int animalId)
@@ -66,7 +77,7 @@ namespace PawTrack.Api.Services
                 .OrderByDescending(d => d.GeneratedAt)
                 .FirstOrDefaultAsync();
 
-            return description is null ? null : ToDto(description);
+            return description is null ? null : ToDto(description, null);
         }
 
         public async Task<AIGeneratedDescriptionDto?> ReviewAsync(int id, int reviewerId, ReviewDescriptionDto dto)
@@ -84,31 +95,106 @@ namespace PawTrack.Api.Services
             await _context.SaveChangesAsync();
             await _context.Entry(description).Reference(d => d.ReviewedBy).LoadAsync();
 
-            return ToDto(description);
+            return ToDto(description, null);
         }
 
-        private static string BuildDraftText(Animal animal, BehaviorRecord? behavior)
+        private async Task<string> CallGeminiApiAsync(Animal animal, BehaviorRecord? behavior)
         {
-            var pronoun = animal.Gender == Gender.Male ? "He" : animal.Gender == Gender.Female ? "She" : "They";
-            var temperament = behavior?.Temperament?.ToLower() is string t && !string.IsNullOrWhiteSpace(t)
-                ? t
-                : "sweet and easygoing";
+            var apiKey = _configuration["Gemini:ApiKey"]
+                         ?? _configuration["GEMINI_API_KEY"]
+                         ?? _configuration["GeminiApiKey"]
+                         ?? Environment.GetEnvironmentVariable("GEMINI_API_KEY");
 
-            var kidsLine = behavior is null ? ""
-                : behavior.CompatibilityWithKids ? " gets along well with kids"
-                : " does best in a home without young children";
+            if (string.IsNullOrWhiteSpace(apiKey))
+            {
+                throw new InvalidOperationException("Gemini API key is not configured. Please set 'Gemini:ApiKey' in configuration or 'GEMINI_API_KEY' environment variable.");
+            }
 
-            var petsLine = behavior is null ? ""
-                : behavior.CompatibilityWithPets ? " and is comfortable around other pets"
-                : " and prefers to be the only pet in the home";
+            var promptText = BuildGeminiPrompt(animal, behavior);
 
-            return $"Meet {animal.Name}, a {animal.Age}-year-old {animal.Breed} {animal.Species.ToLower()} " +
-                   $"rescued from {animal.RescueLocation}. {pronoun} is {temperament}{kidsLine}{petsLine}. " +
-                   $"{animal.Name} is looking for a patient, loving family to call {pronoun.ToLower()} own — " +
-                   $"could that be you?";
+            var requestPayload = new
+            {
+                contents = new[]
+                {
+                    new
+                    {
+                        parts = new[]
+                        {
+                            new { text = promptText }
+                        }
+                    }
+                }
+            };
+
+            var jsonPayload = JsonSerializer.Serialize(requestPayload);
+            var httpContent = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+            var requestUrl = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={apiKey}";
+            var response = await _httpClient.PostAsync(requestUrl, httpContent);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorResponse = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"Gemini API request failed with status code {response.StatusCode}: {errorResponse}");
+            }
+
+            var responseJson = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(responseJson);
+
+            if (doc.RootElement.TryGetProperty("candidates", out var candidates) &&
+                candidates.GetArrayLength() > 0 &&
+                candidates[0].TryGetProperty("content", out var content) &&
+                content.TryGetProperty("parts", out var parts) &&
+                parts.GetArrayLength() > 0 &&
+                parts[0].TryGetProperty("text", out var textProp))
+            {
+                return textProp.GetString()?.Trim() ?? string.Empty;
+            }
+
+            throw new InvalidOperationException("Failed to parse a valid response text from Gemini API.");
         }
 
-        private static AIGeneratedDescriptionDto ToDto(AIGeneratedDescription d, string? animalName = null) => new()
+        private static string BuildGeminiPrompt(Animal animal, BehaviorRecord? behavior)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("You are an expert shelter staff writer crafting warm, engaging, and compelling adoption descriptions for rescue animals at PawTrack.");
+            sb.AppendLine("Write a friendly, heart-warming 2 to 3 paragraph adoption bio for the following rescue animal:");
+            sb.AppendLine($"- Name: {animal.Name}");
+            sb.AppendLine($"- Species: {animal.Species}");
+            sb.AppendLine($"- Breed: {animal.Breed}");
+            sb.AppendLine($"- Age: {animal.Age} years old");
+            sb.AppendLine($"- Gender: {animal.Gender}");
+            sb.AppendLine($"- Rescue Location: {animal.RescueLocation}");
+
+            if (animal.Category != null)
+            {
+                sb.AppendLine($"- Category: {animal.Category.Name}");
+            }
+
+            if (behavior != null)
+            {
+                sb.AppendLine("Behavior & Personality Information:");
+                if (!string.IsNullOrWhiteSpace(behavior.Temperament))
+                {
+                    sb.AppendLine($"  - Temperament: {behavior.Temperament}");
+                }
+                sb.AppendLine($"  - Good with kids: {(behavior.CompatibilityWithKids ? "Yes" : "No / Preferred home without young kids")}");
+                sb.AppendLine($"  - Good with other pets: {(behavior.CompatibilityWithPets ? "Yes" : "No / Preferred as single pet")}");
+                if (!string.IsNullOrWhiteSpace(behavior.Notes))
+                {
+                    sb.AppendLine($"  - Additional Notes: {behavior.Notes}");
+                }
+            }
+
+            sb.AppendLine("\nRequirements:");
+            sb.AppendLine("- Return ONLY the adoption description text. Do not include markdown headers or meta-commentary.");
+            sb.AppendLine("- Highlight their personality traits and paint a vivid picture of them in a loving home.");
+            sb.AppendLine("- Include a warm call-to-action encouraging adopters to meet them.");
+
+            return sb.ToString();
+        }
+
+        private static AIGeneratedDescriptionDto ToDto(AIGeneratedDescription d, string? animalName) => new()
         {
             Id = d.Id,
             AnimalId = d.AnimalId,

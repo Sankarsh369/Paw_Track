@@ -1,18 +1,29 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using PawTrack.Api.Data;
 using PawTrack.Api.DTOs.Chatbot;
 using PawTrack.Api.Models;
 using System.Text;
+using System.Text.Json;
 
 namespace PawTrack.Api.Services
 {
     public class ChatbotService : IChatbotService
     {
         private readonly PawTrackDbContext _context;
+        private readonly HttpClient _httpClient;
+        private readonly IConfiguration _configuration;
 
-        public ChatbotService(PawTrackDbContext context)
+        public ChatbotService(PawTrackDbContext context, HttpClient httpClient, IConfiguration configuration)
         {
             _context = context;
+            _httpClient = httpClient;
+            _configuration = configuration;
+        }
+
+        public ChatbotService(PawTrackDbContext context)
+            : this(context, new HttpClient(), new ConfigurationBuilder().AddEnvironmentVariables().Build())
+        {
         }
 
         public async Task<ChatbotConversationDto> SendMessageAsync(int? userId, SendChatMessageDto dto)
@@ -35,7 +46,8 @@ namespace PawTrack.Api.Services
             };
             _context.ChatbotMessages.Add(userMessage);
 
-            var (reply, handoff) = await BuildReplyAsync(dto.MessageText);
+            var history = conversation.Messages?.ToList();
+            var (reply, handoff) = await BuildReplyAsync(dto.MessageText, history);
             if (handoff) conversation.HandedOffToStaff = true;
 
             var botMessage = new ChatbotMessage
@@ -64,151 +76,179 @@ namespace PawTrack.Api.Services
             return conversation is null ? null : ToDto(conversation);
         }
 
-        private async Task<(string reply, bool handoff)> BuildReplyAsync(string message)
+        private async Task<(string reply, bool handoff)> BuildReplyAsync(string messageText, List<ChatbotMessage>? history)
         {
-            var text = message.ToLowerInvariant();
+            var textLower = messageText.ToLowerInvariant();
+            bool handoffRequested = textLower.Contains("staff") || 
+                                    textLower.Contains("human") || 
+                                    textLower.Contains("person") || 
+                                    textLower.Contains("support") || 
+                                    textLower.Contains("contact");
 
-            // 1. Staff / Handoff
-            if (text.Contains("staff") || text.Contains("human") || text.Contains("person") || text.Contains("agent") || text.Contains("support") || text.Contains("contact"))
+            var dbContextPrompt = await BuildDatabaseContextPromptAsync();
+            var geminiResponse = await CallGeminiChatApiAsync(messageText, history, dbContextPrompt);
+
+            if (handoffRequested)
             {
-                return ("Of course — I've flagged this conversation for a staff member. They will review our chat history and get back to you as soon as possible!", true);
+                var combinedReply = $"{geminiResponse}\n\n*(Note: I have also flagged this conversation for our shelter staff. A team member will review our chat history if you need further assistance!)*";
+                return (combinedReply, true);
             }
 
-            // 2. Animal Searching (cats, dogs, rabbits, birds)
-            string? searchSpecies = null;
-            if (text.Contains("cat")) searchSpecies = "Cat";
-            else if (text.Contains("dog")) searchSpecies = "Dog";
-            else if (text.Contains("rabbit") || text.Contains("bun")) searchSpecies = "Rabbit";
-            else if (text.Contains("bird")) searchSpecies = "Bird";
+            return (geminiResponse, false);
+        }
 
-            if (searchSpecies != null)
+        private async Task<string> BuildDatabaseContextPromptAsync()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("You are PawTrack AI, an intelligent, friendly, and helpful virtual assistant for the PawTrack animal shelter network.");
+            sb.AppendLine("Use the following live PawTrack database context to provide clear, accurate, and helpful natural-language answers to adopters and visitors:");
+
+            try
             {
                 var animals = await _context.Animals
                     .Include(a => a.Branch)
                     .Include(a => a.Category)
-                    .Where(a => a.Status == AnimalStatus.Available && 
-                                (a.Species.ToLower() == searchSpecies.ToLower() || (a.Category != null && a.Category.Name.ToLower() == searchSpecies.ToLower())))
-                    .Take(5)
-                    .ToListAsync();
-
-                if (animals.Any())
-                {
-                    var sb = new StringBuilder();
-                    sb.AppendLine($"Here are some available **{searchSpecies}s** ready for adoption at PawTrack:");
-                    foreach (var a in animals)
-                    {
-                        sb.AppendLine($"- **{a.Name}** ({a.Breed}, {a.Age} yrs, {a.Gender}) at *{a.Branch?.Name}* — [View Profile](/Animals/Details/{a.Id})");
-                    }
-                    sb.AppendLine("\nWould you like to book a visit to meet one of them?");
-                    return (sb.ToString(), false);
-                }
-                else
-                {
-                    return ($"We don't currently have any available **{searchSpecies}s** in our network. Check back soon or try searching for another type of animal!", false);
-                }
-            }
-
-            // General animal query
-            if (text.Contains("animal") || text.Contains("pet") || text.Contains("show me all") || text.Contains("look for"))
-            {
-                var animals = await _context.Animals
-                    .Include(a => a.Branch)
                     .Where(a => a.Status == AnimalStatus.Available)
-                    .Take(5)
+                    .Take(15)
                     .ToListAsync();
 
+                sb.AppendLine("\n--- CURRENT AVAILABLE ANIMALS FOR ADOPTION ---");
                 if (animals.Any())
                 {
-                    var sb = new StringBuilder();
-                    sb.AppendLine("Here are some available animals ready for adoption at PawTrack:");
                     foreach (var a in animals)
                     {
-                        sb.AppendLine($"- **{a.Name}** ({a.Species} - {a.Breed}) at *{a.Branch?.Name}* — [View Profile](/Animals/Details/{a.Id})");
-                    }
-                    return (sb.ToString(), false);
-                }
-                else
-                {
-                    return ("There are currently no available animals ready for adoption. Please check back later!", false);
-                }
-            }
-
-            // 3. Branches / Locations list
-            if (text.Contains("branch") || text.Contains("location") || text.Contains("shelter") || text.Contains("where are you"))
-            {
-                var branches = await _context.Branches.ToListAsync();
-                var sb = new StringBuilder();
-                sb.AppendLine("We operate the following shelter branches:");
-                foreach (var b in branches)
-                {
-                    sb.AppendLine($"- **{b.Name}** ({b.RegionCity}) — Address: *{b.Address}*, Phone: *{b.Phone ?? "N/A"}*");
-                }
-                sb.AppendLine("\nYou can ask me about available animals or visit slots at any of these locations!");
-                return (sb.ToString(), false);
-            }
-
-            // 4. Visit Slots checking / booking support
-            if (text.Contains("slot") || text.Contains("hour") || text.Contains("open") || text.Contains("visit") || text.Contains("schedule") || text.Contains("book") || text.Contains("time") || text.Contains("date"))
-            {
-                // Check if they mentioned a specific branch
-                var branches = await _context.Branches.ToListAsync();
-                var matchedBranch = branches.FirstOrDefault(b => text.Contains(b.Name.ToLower()) || text.Contains(b.RegionCity.ToLower().Split(',')[0]));
-
-                if (matchedBranch != null)
-                {
-                    var slots = await _context.VisitSlots
-                        .Where(s => s.BranchId == matchedBranch.Id && s.SlotDate >= DateTime.UtcNow.Date && s.BookedCount < s.Capacity)
-                        .OrderBy(s => s.SlotDate).ThenBy(s => s.StartTime)
-                        .Take(5)
-                        .ToListAsync();
-
-                    if (slots.Any())
-                    {
-                        var sb = new StringBuilder();
-                        sb.AppendLine($"Here are some upcoming open visit slots at **{matchedBranch.Name}**:");
-                        foreach (var s in slots)
-                        {
-                            sb.AppendLine($"- **{s.SlotDate:yyyy-MM-dd}** from **{s.StartTime:hh\\:mm}** to **{s.EndTime:hh\\:mm}** ({s.Capacity - s.BookedCount} spots left)");
-                        }
-                        sb.AppendLine("\nTo book a visit, go to the profile of the animal you want to meet and select one of these slots!");
-                        return (sb.ToString(), false);
-                    }
-                    else
-                    {
-                        return ($"There are currently no open visit slots scheduled for **{matchedBranch.Name}**. Please check back later or contact the branch directly at **{matchedBranch.Phone ?? "our main line"}**.", false);
+                        sb.AppendLine($"- ID: {a.Id}, Name: {a.Name}, Species: {a.Species}, Breed: {a.Breed}, Age: {a.Age} yrs, Gender: {a.Gender}, Branch: {a.Branch?.Name ?? "Main Shelter"}");
                     }
                 }
                 else
                 {
-                    return ("You can book a free visit slot to meet any available animal. Just click **'View Profile'** on the animal's page, choose an open date and time from the calendar, and click 'Book Visit'.\n\nIf you want me to search open slots, ask me for slots and specify the branch (e.g. *PawTrack Central Shelter* or *PawTrack North Branch*).", false);
+                    sb.AppendLine("No animals are currently listed as available.");
+                }
+            }
+            catch
+            {
+                sb.AppendLine("Animal context unavailable.");
+            }
+
+            try
+            {
+                var branches = await _context.Branches.ToListAsync();
+                sb.AppendLine("\n--- SHELTER BRANCH LOCATIONS ---");
+                if (branches.Any())
+                {
+                    foreach (var b in branches)
+                    {
+                        sb.AppendLine($"- Name: {b.Name}, Address: {b.Address}, City/Region: {b.RegionCity}, Phone: {b.Phone ?? "N/A"}");
+                    }
+                }
+            }
+            catch
+            {
+                sb.AppendLine("Branch context unavailable.");
+            }
+
+            try
+            {
+                var slots = await _context.VisitSlots
+                    .Where(s => s.SlotDate >= DateTime.UtcNow.Date && s.BookedCount < s.Capacity)
+                    .OrderBy(s => s.SlotDate)
+                    .Take(15)
+                    .ToListAsync();
+
+                sb.AppendLine("\n--- UPCOMING OPEN VISIT SLOTS ---");
+                if (slots.Any())
+                {
+                    foreach (var s in slots)
+                    {
+                        sb.AppendLine($"- Branch ID: {s.BranchId}, Date: {s.SlotDate:yyyy-MM-dd}, Time: {s.StartTime:hh\\:mm} - {s.EndTime:hh\\:mm}, Open Spots: {s.Capacity - s.BookedCount}");
+                    }
+                }
+            }
+            catch
+            {
+                sb.AppendLine("Visit slots context unavailable.");
+            }
+
+            sb.AppendLine("\nGuidelines:");
+            sb.AppendLine("- Provide warm, accurate, concise, and helpful responses based on the database context provided above.");
+            sb.AppendLine("- When referencing animals, mention their name, breed, age, and suggest viewing their profile: [View Profile](/Animals/Details/{Id}).");
+            sb.AppendLine("- If the user asks general adoption questions, explain PawTrack adoption procedures (browse animals -> book visit slot -> submit application).");
+            sb.AppendLine("- Maintain a friendly, supportive tone at all times.");
+
+            return sb.ToString();
+        }
+
+        private async Task<string> CallGeminiChatApiAsync(string userMessage, List<ChatbotMessage>? history, string dbContextPrompt)
+        {
+            var apiKey = _configuration["Gemini:ApiKey"]
+                         ?? _configuration["GEMINI_API_KEY"]
+                         ?? _configuration["GeminiApiKey"]
+                         ?? Environment.GetEnvironmentVariable("GEMINI_API_KEY");
+
+            if (string.IsNullOrWhiteSpace(apiKey))
+            {
+                throw new InvalidOperationException("Gemini API key is not configured. Please set 'Gemini:ApiKey' in configuration or 'GEMINI_API_KEY' environment variable.");
+            }
+
+            var contentsList = new List<object>();
+
+            if (history != null && history.Any())
+            {
+                foreach (var msg in history.TakeLast(10))
+                {
+                    var role = msg.Sender == ChatSender.User ? "user" : "model";
+                    contentsList.Add(new
+                    {
+                        role = role,
+                        parts = new[] { new { text = msg.MessageText } }
+                    });
                 }
             }
 
-            // 5. Donations
-            if (text.Contains("donat") || text.Contains("fund"))
+            contentsList.Add(new
             {
-                return ("Thank you for wanting to help! You can donate to our general fund or to a " +
-                        "specific animal's care from the [Donate](/Donate) page — every bit helps with food, " +
-                        "vet care, and shelter.", false);
+                role = "user",
+                parts = new[] { new { text = userMessage } }
+            });
+
+            var requestPayload = new
+            {
+                systemInstruction = new
+                {
+                    parts = new[]
+                    {
+                        new { text = dbContextPrompt }
+                    }
+                },
+                contents = contentsList
+            };
+
+            var jsonPayload = JsonSerializer.Serialize(requestPayload);
+            var httpContent = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+            var requestUrl = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={apiKey}";
+            var response = await _httpClient.PostAsync(requestUrl, httpContent);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorResponse = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"Gemini API request failed with status code {response.StatusCode}: {errorResponse}");
             }
 
-            // 6. Fees
-            if (text.Contains("fee") || text.Contains("cost") || text.Contains("price"))
+            var responseJson = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(responseJson);
+
+            if (doc.RootElement.TryGetProperty("candidates", out var candidates) &&
+                candidates.GetArrayLength() > 0 &&
+                candidates[0].TryGetProperty("content", out var content) &&
+                content.TryGetProperty("parts", out var parts) &&
+                parts.GetArrayLength() > 0 &&
+                parts[0].TryGetProperty("text", out var textProp))
             {
-                return ("Adoption fees vary by branch and animal and typically cover vaccinations and " +
-                        "a health check. You'll see the exact fee before you confirm an adoption.", false);
+                return textProp.GetString()?.Trim() ?? string.Empty;
             }
 
-            // 7. General Adopt query
-            if (text.Contains("adopt"))
-            {
-                return ("To adopt, browse available animals, book a visit at your nearest branch, " +
-                        "then submit an adoption application from the animal's page. Our staff review " +
-                        "every application before it's approved.", false);
-            }
-
-            // 8. Fallback: Handoff to staff if we can't answer (helpful support in any situation)
-            return ("I'm not sure I have a direct answer for that, so I have flagged this conversation for our shelter staff. A team member will review our chat and get back to you! Is there anything else I can help with?", true);
+            throw new InvalidOperationException("Failed to parse a valid response text from Gemini API.");
         }
 
         private static ChatbotConversationDto ToDto(ChatbotConversation c) => new()

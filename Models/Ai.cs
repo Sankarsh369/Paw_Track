@@ -24,7 +24,7 @@ namespace PawTrack.Api.Models
         public string GeneratedText { get; set; } = string.Empty;
 
         [MaxLength(30)]
-        public string ModelVersion { get; set; } = "claude-sonnet-5";
+        public string ModelVersion { get; set; } = "gemini-2.5-flash";
 
         // Never shown publicly until a staff member approves it
         public bool IsApproved { get; set; } = false;
